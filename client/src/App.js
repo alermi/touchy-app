@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import './App.css';
 
+import { io } from "socket.io-client";
+const socket = io('http://8b3ff6ac5254.ngrok.io');
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -10,17 +13,22 @@ class App extends Component {
   }
   
   callAPI() {
-    fetch("http://192.168.86.191:9000/testAPI")
+    fetch("https://8b3ff6ac5254.ngrok.io/testAPI")
         .then(res => res.text())
         .then(res => this.setState({ apiResponse: res }));
   }
 
   componentDidMount() {
       this.callAPI();
+
+      socket.on('connect', () => {
+        console.log("Connected to server socket.io");
+      });
   }
 
   handleMouseMove(e){
     console.log('x: ' + e.clientX + ' y: ' + e.clientY);
+    socket.send('x: ' + e.clientX + ' y: ' + e.clientY);
   }
 
   render(){
