@@ -2,7 +2,11 @@ import React, { Component } from "react";
 import './App.css';
 
 import { io } from "socket.io-client";
-const socket = io('http://8b3ff6ac5254.ngrok.io');
+
+const dotenv = require('dotenv');
+dotenv.config();
+
+const socket = io(process.env.REACT_APP_API_URL);
 
 class App extends Component {
   constructor(props) {
@@ -13,7 +17,7 @@ class App extends Component {
   }
   
   callAPI() {
-    fetch("https://8b3ff6ac5254.ngrok.io/testAPI")
+    fetch( process.env.REACT_APP_API_URL + '/testAPI' )
         .then(res => res.text())
         .then(res => this.setState({ apiResponse: res }));
   }
