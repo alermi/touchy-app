@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 const dotenv = require('dotenv');
 dotenv.config();
 
-const socket = io(process.env.REACT_APP_API_URL);
+const socket = io(process.env.REACT_APP_SERVER_URL);
 
 class App extends Component {
   constructor(props) {
@@ -17,7 +17,7 @@ class App extends Component {
   }
   
   callAPI() {
-    fetch( process.env.REACT_APP_API_URL + '/testAPI' )
+    fetch( process.env.REACT_APP_SERVER_URL + '/testAPI' )
         .then(res => res.text())
         .then(res => this.setState({ apiResponse: res }));
   }
