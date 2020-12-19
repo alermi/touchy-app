@@ -7,7 +7,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const socket = io(process.env.REACT_APP_SERVER_URL);
-
 class App extends Component {
   constructor(props) {
     super(props);
