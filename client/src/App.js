@@ -27,10 +27,12 @@ class App extends Component {
       socket.on('connect', () => {
         console.log("Connected to server socket.io");
       });
+      socket.on('message', data => {
+        console.log('Client received message: ' + data);
+      });
   }
 
   handleMouseMove(e){
-    console.log('x: ' + e.clientX + ' y: ' + e.clientY);
     socket.send('x: ' + e.clientX + ' y: ' + e.clientY);
   }
 

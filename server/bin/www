@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.SERVER_PORT || '9000');
+var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 
 /**
@@ -32,19 +32,29 @@ const io = require('socket.io')(server, {
     methods: ["GET", "POST"]
   }
 });
-
 console.log("CORS at " + process.env.CLIENT_URL);
 
+const RECEIVER_CHANNEL_NAME = 'receivers-room';
+
+var currReceiverSocket = null;
 io.on('connection', socket => {
+  if(currReceiverSocket != null){
+    currReceiverSocket.leave(RECEIVER_CHANNEL_NAME);
+    console.log(currReceiverSocket.id + ' left receiver channel');
+  }
+  socket.join(RECEIVER_CHANNEL_NAME);
+  console.log(socket.id + ' joined receiver channel');
+  //TODO: Change this functionality of the last connection being the receiver.
+  currReceiverSocket = socket;
 
   socket.on('message', data => {
-    console.log('Server side socket received message: ' + data);
+    io.to(RECEIVER_CHANNEL_NAME).emit('message', 'Data from server: ' + data);
   });
 
   console.log('Client connected ' + socket.id);
 
-  socket.on('disconnect', function(){
-    console.log('Client disconnected');
+  socket.on('disconnect', socket => {
+    console.log('Client disconnected ' + socket.id);
   });
 
 });
