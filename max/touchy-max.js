@@ -6,6 +6,8 @@ var socket;
 maxApi.addHandler('connect', (url) => {
     socket = io(url);
     
+    socket.emit('joinReceivers');
+
     socket.on('message', (data) => {
         maxApi.outlet('coordinateUpdates', data);
     })

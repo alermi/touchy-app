@@ -36,25 +36,21 @@ console.log("CORS at " + process.env.CLIENT_URL);
 
 const RECEIVER_CHANNEL_NAME = 'receivers-room';
 
-var currReceiverSocket = null;
 io.on('connection', socket => {
-  if(currReceiverSocket != null){
-    currReceiverSocket.leave(RECEIVER_CHANNEL_NAME);
-    console.log(currReceiverSocket.id + ' left receiver channel');
-  }
-  socket.join(RECEIVER_CHANNEL_NAME);
-  console.log(socket.id + ' joined receiver channel');
-  //TODO: Change this functionality of the last connection being the receiver.
-  currReceiverSocket = socket;
+  console.log('Client ' + socket.id + ' connected');
 
   socket.on('message', data => {
-    io.to(RECEIVER_CHANNEL_NAME).emit('message', 'Data from server: ' + data);
+    //TODO: Format check
+      io.to(RECEIVER_CHANNEL_NAME).emit('message', data);
   });
 
-  console.log('Client connected ' + socket.id);
+  socket.on('joinReceivers', () => {
+    socket.join(RECEIVER_CHANNEL_NAME);
+    console.log('Client ' + socket.id + ' joined receivers');
+  })
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected ' + socket.id);
+    console.log('Client ' + socket.id + ' disconnected');
   });
 
 });
