@@ -9,7 +9,11 @@ maxApi.addHandler('connect', (url) => {
     socket.emit('joinReceivers');
 
     socket.on('message', (data) => {
-        maxApi.outlet('coordinateUpdates', data);
+        if(Array.isArray(data)){
+            if(data.length === 2){
+                maxApi.outlet('coordinateUpdates', data[0] + ' ' + data[1]);
+            }
+        }
     })
 })
 

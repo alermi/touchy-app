@@ -3,10 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import ReactCursorPosition from 'react-cursor-position';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ReactCursorPosition>
+      <App />
+    </ReactCursorPosition>
   </React.StrictMode>,
   document.getElementById('root')
 );
