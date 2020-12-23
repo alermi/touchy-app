@@ -10,9 +10,7 @@ maxApi.addHandler('connect', (url) => {
 
     socket.on('message', (data) => {
         if(Array.isArray(data)){
-            if(data.length === 2){
-                maxApi.outlet('coordinateUpdates', data[0] + ' ' + data[1]);
-            }
+            maxApi.outlet(data);
         }
     })
 })
