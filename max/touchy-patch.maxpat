@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 77.0, 1452.0, 929.0 ],
+		"rect" : [ 1954.0, 326.0, 1468.0, 713.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -40,13 +40,47 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-18",
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 481.969878315925598, 156.0, 117.0, 20.0 ],
+					"text" : "Click to disconnect"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-16",
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 216.10843288898468, 70.0, 107.0, 20.0 ],
+					"text" : "Bang to connect"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-14",
+					"linecount" : 4,
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 17.0, 28.0, 150.0, 62.0 ],
+					"text" : "Press this button if this is the first time you are running the patch to install the node modules."
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-48",
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 36.10843288898468, 452.0, 344.0, 22.0 ],
-					"text" : "0.681122 0.054196"
+					"text" : "0.268952 0.002068"
 				}
 
 			}
@@ -57,7 +91,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 36.10843288898468, 84.0, 76.0, 22.0 ],
+					"patching_rect" : [ 36.10843288898468, 95.0, 76.0, 22.0 ],
 					"text" : "script npm ci"
 				}
 
@@ -69,7 +103,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 168.10843288898468, 103.145180678367609, 35.0, 22.0 ],
+					"patching_rect" : [ 240.10843288898468, 95.0, 35.0, 22.0 ],
 					"text" : "bang"
 				}
 
@@ -81,7 +115,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "bang" ],
-					"patching_rect" : [ 162.10843288898468, 170.145180678367609, 67.0, 22.0 ],
+					"patching_rect" : [ 208.10843288898468, 156.0, 67.0, 22.0 ],
 					"text" : "delay 1000"
 				}
 
@@ -93,7 +127,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 449.469878315925598, 215.096386432647705, 66.0, 22.0 ],
+					"patching_rect" : [ 507.469878315925598, 187.096386432647705, 66.0, 22.0 ],
 					"text" : "disconnect"
 				}
 
@@ -105,7 +139,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 156.469878315925598, 215.096386432647705, 278.0, 22.0 ],
+					"patching_rect" : [ 187.469878315925598, 187.096386432647705, 278.0, 22.0 ],
 					"text" : "connect https://touchy-backend.azurewebsites.net/"
 				}
 
@@ -117,7 +151,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 87.10843288898468, 169.903613567352295, 64.0, 22.0 ],
+					"patching_rect" : [ 139.10843288898468, 156.145180678367609, 64.0, 22.0 ],
 					"text" : "script start"
 				}
 
@@ -137,7 +171,7 @@
 					"numoutlets" : 1,
 					"offset" : [ 0.0, 0.0 ],
 					"outlettype" : [ "bang" ],
-					"patching_rect" : [ 711.822066307067871, 306.108436584472656, 400.0, 220.0 ],
+					"patching_rect" : [ 391.822066307067871, 254.108436584472656, 400.0, 220.0 ],
 					"viewvisibility" : 1
 				}
 
@@ -153,6 +187,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
