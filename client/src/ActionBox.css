@@ -1,0 +1,25 @@
+.Action-box{
+    background-color: #177E89;
+    border-radius: 25px;
+    min-height: 65vh;
+    justify-content: center;
+    margin-top:5vh;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    border: 2px solid #323031;
+  }
+
+  .cursor {
+    background-color: #084C61;
+    border: 2px solid #323031;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: relative;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+  }
+  

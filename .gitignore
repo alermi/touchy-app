@@ -3,6 +3,7 @@
 # dependencies
 /api/node_modules
 /client/node_modules
+/max/node_modules
 
 /api/.pnp
 /client/.pnp

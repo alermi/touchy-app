@@ -1,17 +1,18 @@
 .App {
+  background-color: #084C61;
   text-align: center;
   overflow:hidden;
+  min-height: 100vh;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-top:3vh;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #323031;
 }
 
 
