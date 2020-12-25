@@ -64,7 +64,9 @@ class ActionBox extends Component {
 
     onActivationChanged(e){
         this.setState({isActive: e.isActive});
-        //TODO: If activation turned true, send data in order to not miss quick taps.
+        if(e.isActive){
+            this.sendData();
+        }
     }
 
     render(){
