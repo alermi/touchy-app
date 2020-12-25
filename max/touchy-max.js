@@ -1,23 +1,15 @@
 const maxApi = require('max-api');
 const io = require('socket.io-client');
+const dotenv = require('dotenv');
+dotenv.config();
 
-var socket;
-
-maxApi.addHandler('connect', (url) => {
-    socket = io(url);
-    
+const socket = io(process.env.BACKEND_URL);    
+socket.on('connect', () => {
     socket.emit('joinReceivers');
+});
 
-    socket.on('message', (data) => {
-        if(Array.isArray(data)){
-            maxApi.outlet(data);
-        }
-    })
-})
-
-maxApi.addHandler('disconnect', () => {
-    if(socket != null){
-        socket.close();
+socket.on('message', (data) => {
+    if(Array.isArray(data)){
+        maxApi.outlet(data);
     }
-})
-
+});

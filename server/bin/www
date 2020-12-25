@@ -23,38 +23,11 @@ var server = http.createServer(app);
 app.set('server', server);
 
 /**
- * Set up socket.io
+ * Set up connection handler with the server which controls sockets
  */
 
-const io = require('socket.io')(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST"]
-  }
-});
-console.log("CORS at " + process.env.CLIENT_URL);
-
-const RECEIVER_CHANNEL_NAME = 'receivers-room';
-
-io.on('connection', socket => {
-  console.log('Client ' + socket.id + ' connected');
-
-  socket.on('message', data => {
-    //TODO: Format check
-      io.to(RECEIVER_CHANNEL_NAME).emit('message', data);
-  });
-
-  socket.on('joinReceivers', () => {
-    socket.join(RECEIVER_CHANNEL_NAME);
-    console.log('Client ' + socket.id + ' joined receivers');
-  })
-
-  socket.on('disconnect', () => {
-    console.log('Client ' + socket.id + ' disconnected');
-  });
-
-});
-
+var ConnectionHandler = require('../src/connectionHandler');
+const connectionHandler = new ConnectionHandler(server);
 
 /**
  * Listen on provided port, on all network interfaces.

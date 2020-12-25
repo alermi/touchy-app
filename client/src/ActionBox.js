@@ -4,7 +4,6 @@ import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import { io } from "socket.io-client";
 
-const socket = io(process.env.REACT_APP_SERVER_URL);
 class ActionBox extends Component {
     constructor(props) {
         super(props);
@@ -12,6 +11,7 @@ class ActionBox extends Component {
             activeXProportion: 0,
             activeYProportion: 0,
             isActive: false,
+            isPositionOutside: true,
             elementDimensions: {
                 width: -1,
                 height: -1
@@ -22,21 +22,26 @@ class ActionBox extends Component {
 
     }
     componentDidMount() {
-        socket.on('connect', () => {
+        this.socket = io(process.env.REACT_APP_SERVER_URL);
+
+        this.socket.on('connect', () => {
             console.log("Connected to server socket.io");
         });
           
         this.interval = setInterval(() => {
-            if(true){
-                let data = [this.state.activeXProportion, this.state.activeYProportion];
-                // console.log(data);
-                if(socket.connected){
-                    socket.send(data);
-                }
-            }
+            this.sendData();
         }, 1000/5);
     }
     
+    sendData(){
+        if(!this.state.isPositionOutside && this.state.isActive){
+            let data = [this.state.activeXProportion, this.state.activeYProportion];
+            if(this.socket.connected){
+                this.socket.send(data);
+            }
+        }
+    }
+
     componentWillUnmount(){
         clearInterval(this.interval);
     }
@@ -45,7 +50,10 @@ class ActionBox extends Component {
         if(e.elementDimensions != null){
             this.setState({elementDimensions: e.elementDimensions})
         }
-        if(!e.isPositionOutside && this.state.isActive){
+
+        this.setState({isPositionOutside: e.isPositionOutside});
+        console.log(e.isPositionOutside);
+        if(!e.isPositionOutside){
             let x = e.position.x;
             let y = e.position.y;
             
@@ -54,8 +62,9 @@ class ActionBox extends Component {
         }
     }
 
-    onActivationChanged(isActive){
-        this.setState({isActive: isActive});
+    onActivationChanged(e){
+        this.setState({isActive: e.isActive});
+        //TODO: If activation turned true, send data in order to not miss quick taps.
     }
 
     render(){
@@ -67,8 +76,10 @@ class ActionBox extends Component {
                     onPositionChanged={this.onPositionChanged}
                     onActivationChanged={this.onActivationChanged}>
                 <Cursor className="cursor"/>
-                {/* x: {this.state.activeXProportion*100} */}
-                {/* y: {this.state.activeYProportion*100} */}
+                isActive: {this.state.isActive ? 'true ' : 'false '}  <br/>
+                isPositionOutside: {this.state.isPositionOutside?'true' : 'false'} <br/>
+                x: {this.state.activeXProportion}  <br/>
+                y: {this.state.activeYProportion} <br/>
             </ReactCursorPosition>
         </div>
         )}

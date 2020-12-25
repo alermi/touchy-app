@@ -15,7 +15,7 @@ var app = express();
 // var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var testAPIRouter = require("./routes/testAPI");
-var webSocket = require('./routes/webSocket');
+// var webSocket = require('./src/webSocket');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
