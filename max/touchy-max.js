@@ -2,7 +2,6 @@ const maxApi = require('max-api');
 const io = require('socket.io-client');
 const dotenv = require('dotenv');
 dotenv.config();
-
 const socket = io(process.env.BACKEND_URL);    
 
 const DATA_PER_USER = 5;
@@ -20,7 +19,7 @@ socket.on('message', (data) => {
         console.log("WARNING: Data size is not divisible by " + DATA_PER_USER + ". Ignored.");
         return;
     }
-    var dict = {};
+    var outputList = [];
     for(var i = 0; i < data.length; i+=DATA_PER_USER){
         var userId = data[i];
         var x = data[i + 1];
@@ -37,16 +36,19 @@ socket.on('message', (data) => {
         }
         if(typeof isActive != 'boolean'){
             console.log("WARNING: Invalid isActive received. Datapoint ignored.");
+            continue;
         }
         if(typeof timeStamp != 'number' || timeStamp < 1608932911991){
             console.log("WARNING: Invalid timeStamp received. Datapoint ignored.");
+            continue;
         }
         if(x < 0.0) x = 0.0;
         if(x > 1.0) x = 1.0;
         if(y < 0.0) y = 0.0;
         if(y > 1.0) y = 1.0;
-        dict[userId] = [x, y, isActive, timeStamp];
+        
+        outputList.push(x + '_' + y + '_' + (isActive ? 1 : 0) + '_' + timeStamp);
     }
-    maxApi.outlet(dict);
+    maxApi.outlet(outputList);
     
 });
