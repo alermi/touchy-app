@@ -52,7 +52,6 @@ class ActionBox extends Component {
         }
 
         this.setState({isPositionOutside: e.isPositionOutside});
-        console.log(e.isPositionOutside);
         if(!e.isPositionOutside){
             let x = e.position.x;
             let y = e.position.y;
