@@ -61,8 +61,8 @@ class ConnectionHandler{
             this.handleJoinReceiversRequest(socket);  
         })
         
-        socket.on('disconnect', () => {
-            this.handleDisconnect(socket);
+        socket.on('disconnect', (reason) => {
+            this.handleDisconnect(socket, reason);
         });
     }
 
@@ -87,12 +87,12 @@ class ConnectionHandler{
         this.sendersMap.set(socket.id, newConnectionData);
     }
 
-    handleDisconnect(socket){
+    handleDisconnect(socket, reason){
         this.cleanSocketData(socket);
         if(!this.checkIfShouldSend() && this.interval != false){
             this.stopSending();
         }
-        console.log('Client ' + socket.id + ' disconnected');
+        console.log('Client ' + socket.id + ' disconnected for reason: ' + reason);
     }
 
     handleJoinReceiversRequest(socket){
