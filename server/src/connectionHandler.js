@@ -35,14 +35,14 @@ class ConnectionHandler{
         if(this.sendersMap.has(socket.id)){
             console.log("WARNING: Sender " + socket.id + " tried to connect again. Closing connection.");
             this.cleanSocketData(socket);
-            socket.terminate();
+            socket.disconnect(true);
             return;
         }
 
         if(this.receivers.includes(socket.id)){
             console.log("WARNING: Receiver " + socket.id + " tried to connect again. Closing connection.");
             this.cleanSocketData(socket);
-            socket.terminate();
+            socket.disconnect(true);
             return;
         }
 
@@ -96,20 +96,21 @@ class ConnectionHandler{
     }
 
     handleJoinReceiversRequest(socket){
+        if(this.receivers.includes(socket.id)){
+            console.log("WARNING: Client " + socket.id + " tried to join receivers but was already in receivers.");
+            return;
+        }
+        else{
+            this.receivers.push(socket.id);
+            console.log('Client ' + socket.id + ' joined receivers');
+        }
         socket.join(RECEIVER_CHANNEL_NAME);
+
         if(this.sendersMap.has(socket.id)){
             this.sendersMap.delete(socket.id);
         }
         else{
             console.log("WARNING: Client " + socket.id + " joined receivers but was not previously in senders.");
-        }
-
-        if(this.receivers.includes(socket.id)){
-            console.log("WARNING: Client " + socket.id + " tried to join receivers but was already in receivers.");
-        }
-        else{
-            this.receivers.push(socket.id);
-            console.log('Client ' + socket.id + ' joined receivers');
         }
 
         if(this.checkIfShouldSend() && this.interval == false){
