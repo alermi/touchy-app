@@ -432,32 +432,31 @@ describe('Multiple senders, multiple receivers', function() {
           throw new Error("Sender " + i + " not yet connected when tried to send messages");
         }
       }
-
-      setTimeout(() => {
-        let receivedValidMessagesCount = 0;
-        for(let i = 0; i < receiversCount; i++){
-          receivers[i].on('message', data => {
-            let receivedMap = convertMessageToMap(data, senders);
-            assert.strictEqual(receivedMap.size, sendersCount);
-  
-            for(j = 0; j < sendersCount; j++){
-              let currSenderEntry = senders[j];
-              assert.strictEqual(currSenderEntry.lastSentX, receivedMap.get(currSenderEntry.socket.id).x);
-              assert.strictEqual(currSenderEntry.lastSentY, receivedMap.get(currSenderEntry.socket.id).y);
-            }
-            receivedValidMessagesCount++;
-            // Stop when we received 10 messages per receiver.
-            // TODO: Check if all receivers actually received messages
-            // console.log("Receiver " + i + " received a message. receivedValidMessagesCount=" + receivedValidMessagesCount);
-            if(receivedValidMessagesCount == (receiversCount * 10)){
-              senders.forEach((sender) => { sender.socket.close(); });
-              receivers.forEach((receiver) => { receiver.close(); });
-              done();
-            }
-          });
-        }
-      }, 4000)
     }, 10000)
+    setTimeout(() => {
+      let receivedValidMessagesCount = 0;
+      for(let i = 0; i < receiversCount; i++){
+        receivers[i].on('message', data => {
+          let receivedMap = convertMessageToMap(data, senders);
+          assert.strictEqual(receivedMap.size, sendersCount);
+
+          for(j = 0; j < sendersCount; j++){
+            let currSenderEntry = senders[j];
+            assert.strictEqual(currSenderEntry.lastSentX, receivedMap.get(currSenderEntry.socket.id).x);
+            assert.strictEqual(currSenderEntry.lastSentY, receivedMap.get(currSenderEntry.socket.id).y);
+          }
+          receivedValidMessagesCount++;
+          // Stop when we received 10 messages per receiver.
+          // TODO: Check if all receivers actually received messages
+          // console.log("Receiver " + i + " received a message. receivedValidMessagesCount=" + receivedValidMessagesCount);
+          if(receivedValidMessagesCount == (receiversCount * 10)){
+            senders.forEach((sender) => { sender.socket.close(); });
+            receivers.forEach((receiver) => { receiver.close(); });
+            done();
+          }
+        });
+      }
+    }, 14000)
   });
 });
 
