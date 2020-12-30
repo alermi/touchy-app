@@ -155,13 +155,14 @@ class ConnectionHandler{
     sendDataToReceivers(){
         if(this.sendersMap.size <= 0 || this.receivers.length <= 0){
             // Returning, there is no receivers or senders.
-            console.log("WARNING: sendDataToReceivers should not have been called since senders or receivers is empty.");
+            console.log("WARNING: sendDataToReceivers should not have been called since either senders or receivers is empty.");
             return;
         }
         var data = [];
         for(var [key, val] of this.sendersMap){
             if(key == null){
                 console.log("WARNING: Key in sendersMap was null");
+                continue;
             }
 
             if(val == null){
