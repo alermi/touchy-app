@@ -25,7 +25,12 @@ class ActionBox extends Component {
         this.socket = io(process.env.REACT_APP_SERVER_URL);
 
         this.socket.on('connect', () => {
+            this.socket.emit('joinSenders');
             console.log("Connected to server socket.io");
+        });
+
+        this.socket.on('disconnect', () => {
+            console.log("Disconnected from server socket.io");
         });
           
         this.interval = setInterval(() => {
@@ -43,6 +48,7 @@ class ActionBox extends Component {
     }
 
     componentWillUnmount(){
+        this.socket.disconnect();
         clearInterval(this.interval);
     }
 

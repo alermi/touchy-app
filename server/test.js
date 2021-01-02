@@ -8,6 +8,8 @@ const DEFAULT_IS_ACTIVE_VALUE = false;
 const io = require('socket.io-client');
 const assert = require('assert');
 
+const WAIT_TIME_TO_BE_REGISTERED = 50;
+
 let serverURL;
 let server;
 let connectionHandler;
@@ -45,7 +47,11 @@ describe('Single sender single receiver, sender connects first', function() {
   beforeEach(() => {
     if(ioSend == null || !ioSend.connected){
       ioSend = io(serverURL);
+      ioSend.on('connect', () => {
+        ioSend.emit('joinSenders');
+      });
     }
+
     if(ioReceive == null || !ioReceive.connected){
       ioReceive = io(serverURL);
       ioReceive.on('connect', () => {
@@ -68,9 +74,10 @@ describe('Single sender single receiver, sender connects first', function() {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
-    ioSend.on('connect', () => {
+    ioSend.emit('joinSenders');
+    setTimeout(() => {
       ioSend.send([randX, randY]);
-    });
+    }, WAIT_TIME_TO_BE_REGISTERED);
 
     let receivedValidMessage = false;
     ioReceive.on('message', data => {
@@ -109,7 +116,7 @@ describe('Single sender single receiver, sender connects first', function() {
         }
       });
 
-    ioSend.on('connect', () => {
+    setTimeout(() => {
       // Invalid messages
       ioSend.send([0, 2]);
       ioSend.send([-1, 0.5]);
@@ -124,8 +131,8 @@ describe('Single sender single receiver, sender connects first', function() {
       for(let i = 0; i < 12; i++){
         longString += longString;
       }
-      ioSend.send([longString, longString]);
-    });
+      ioSend.send([longString, longString]);   
+    }, WAIT_TIME_TO_BE_REGISTERED);
   });
 
   it('Ignore messages sent by a receiver', done => {
@@ -134,6 +141,10 @@ describe('Single sender single receiver, sender connects first', function() {
     const randY = Math.random();
     
     let receivedValidMessage = false;
+    setTimeout(() => {
+      ioSend.send([randX, randY]);
+    }, WAIT_TIME_TO_BE_REGISTERED);
+
     ioReceive.on('message', data => {
       //Send a message back, should be ignored and we should receive the expected messages
       ioReceive.send([0.5, 0.5]);
@@ -155,10 +166,6 @@ describe('Single sender single receiver, sender connects first', function() {
         return;
       }
     });
-
-    ioSend.on('connect', () => {
-      ioSend.send([randX, randY]);
-    });
   });
 
   it('Ignore multiple requests to join receivers', done => {
@@ -167,7 +174,10 @@ describe('Single sender single receiver, sender connects first', function() {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
-    
+    setTimeout(() => {
+      ioSend.send([randX, randY]);
+    }, WAIT_TIME_TO_BE_REGISTERED);
+
     let receivedValidMessage = false;
     ioReceive.on('message', data => {
       // Extra join receivers request
@@ -189,10 +199,6 @@ describe('Single sender single receiver, sender connects first', function() {
         done();
         return;
       }
-    });
-
-    ioSend.on('connect', () => {
-      ioSend.send([randX, randY]);
     });
   });
 });
@@ -226,7 +232,10 @@ describe('Single sender single receiver, receiver connects first', function() {
         ioSend = io(serverURL);
       }
       ioSend.on('connect', () => {
-        ioSend.send([randX, randY]);
+        ioSend.emit("joinSenders");
+        setTimeout(() => {
+          ioSend.send([randX, randY]);
+        }, WAIT_TIME_TO_BE_REGISTERED)
       });
     }, 1000)
 
@@ -268,21 +277,24 @@ describe('Single sender single receiver, receiver connects first', function() {
         ioSend = io(serverURL);
       }
       ioSend.on('connect', () => {
-        // Invalid messages
-        ioSend.send([0, 2]);
-        ioSend.send([-1, 0.5]);
-        ioSend.send([0.5]);
-        ioSend.send([0, 0, 0]);
-        ioSend.send(["Hi", 0, 0]);
-        ioSend.send([-999999999999999999, 0.5]);
-        ioSend.send([0, true]);
-        ioSend.send(["hi", 1]);
-        ioSend.send(["hi", "there"]);
-        let longString = "This is a long string";
-        for(let i = 0; i < 12; i++){
-          longString += longString;
-        }
-        ioSend.send([longString, longString]);
+        ioSend.emit("joinSenders");
+        setTimeout(() => {
+          // Invalid messages
+          ioSend.send([0, 2]);
+          ioSend.send([-1, 0.5]);
+          ioSend.send([0.5]);
+          ioSend.send([0, 0, 0]);
+          ioSend.send(["Hi", 0, 0]);
+          ioSend.send([-999999999999999999, 0.5]);
+          ioSend.send([0, true]);
+          ioSend.send(["hi", 1]);
+          ioSend.send(["hi", "there"]);
+          let longString = "This is a long string";
+          for(let i = 0; i < 12; i++){
+            longString += longString;
+          }
+          ioSend.send([longString, longString]);
+        }, WAIT_TIME_TO_BE_REGISTERED)
       });
     }, 1000)
 
@@ -388,8 +400,12 @@ describe('Multiple senders, multiple receivers', function() {
   beforeEach(() => {
     senders = [];
     for(let i = 0; i < sendersCount; i++){
+      let tempSender = io(serverURL);
+      tempSender.on('connect', () => {
+        tempSender.emit('joinSenders');
+      });
       senders.push({
-        socket: io(serverURL),
+        socket: tempSender,
         lastSentX: null,
         lastSentY: null
       });
