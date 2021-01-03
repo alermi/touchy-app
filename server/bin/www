@@ -27,7 +27,7 @@ app.set('server', server);
  */
 
 var ConnectionHandler = require('../src/connectionHandler');
-const connectionHandler = new ConnectionHandler(server);
+const connectionHandler = new ConnectionHandler(server, 5, 100, 4000);
 
 /**
  * Listen on provided port, on all network interfaces.

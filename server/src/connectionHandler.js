@@ -9,11 +9,8 @@ class ConnectionData {
     }
 }
 
-const MAX_RECEIVERS_COUNT = 5;
-const MAX_SENDERS_COUNT = 100;
-const UNDECIDED_TIMEOUT = 4000
 class ConnectionHandler{
-    constructor(server){
+    constructor(server, maxReceiversCount, maxSendersCount, undecidedTimeout){
         // this.server = server;
         this.receivers = [];
         this.io = require('socket.io')(server, {
@@ -34,6 +31,9 @@ class ConnectionHandler{
         this.currReceiversCount = 0;
         this.currSendersCount = 0;
         this.undecidedConnections = new Map();
+        this.maxReceiversCount = maxReceiversCount;
+        this.maxSendersCount = maxSendersCount;
+        this.undecidedTimeout = undecidedTimeout;
     }
 
     handleNewConnection(socket){
@@ -76,7 +76,7 @@ class ConnectionHandler{
         //TODO: Check if it is already in the undecidedConnections.
         let newTimeout = setTimeout(() => {
             this.handleUndecidedConnectionTimeout(socket);
-        }, UNDECIDED_TIMEOUT);
+        }, this.undecidedTimeout);
 
         this.undecidedConnections.set(socket.id, {socket: socket, timeout: newTimeout});
     }
@@ -123,17 +123,16 @@ class ConnectionHandler{
             console.log("WARNING: Client " + socket.id + " tried to join senders but was already in senders.");
             return;
         }
-        this.cleanUndecidedSocketData(socket, true);
 
-        if(this.currSendersCount >= MAX_SENDERS_COUNT){
-            if(this.currSendersCount > MAX_SENDERS_COUNT){ console.log("ERROR: Current senders count is greater than maximum allowed.")};
+        if(this.currSendersCount >= this.maxSendersCount){
+            if(this.currSendersCount > this.maxSendersCount){ console.log("ERROR: Current senders count is greater than maximum allowed.")};
             console.log("Socket " + socket.id + " tried to join senders but was rejected because receivers are full.");
             socket.disconnect();
             return;
         }
-        
-        this.currSendersCount++;
 
+        this.currSendersCount++;
+        this.cleanUndecidedSocketData(socket, true);
         this.sendersMap.set(socket.id, new ConnectionData(Date.now(), 0, 0, false));
         if(this.checkIfShouldSend() && this.interval == false){
             this.startSending();
@@ -156,8 +155,8 @@ class ConnectionHandler{
         }
         this.cleanUndecidedSocketData(socket, true);
 
-        if(this.currReceiversCount >= MAX_RECEIVERS_COUNT){
-            if(this.currReceiversCount > MAX_RECEIVERS_COUNT){ console.log("ERROR: Current receivers count is greater than maximum allowed.")};
+        if(this.currReceiversCount >= this.maxReceiversCount){
+            if(this.currReceiversCount > this.maxReceiversCount){ console.log("ERROR: Current receivers count is greater than maximum allowed.")};
             console.log("Socket " + socket.id + " tried to join receivers but was rejected because receivers are full.");
             socket.disconnect();
             return;
