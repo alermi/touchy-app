@@ -23,7 +23,7 @@ before(() => {
     app.set('port', port);
     server = http.createServer(app);
     var ConnectionHandler = require('./src/connectionHandler');
-    connectionHandler = new ConnectionHandler(server);
+    connectionHandler = new ConnectionHandler(server, 5, 100, 4000);
     server.listen(port);
     app.set('server', server);
     serverURL = "http://localhost:" + port + "/";
