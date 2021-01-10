@@ -22,23 +22,32 @@ class ActionBox extends Component {
 
     }
     componentDidMount() {
-        this.socket = io(process.env.REACT_APP_SERVER_URL);
-
+        // const { firebase } = this.props;
+        // //TODO: Consider changing this forceRefresh parameter
+        // const idToken = await firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
+            
+        this.socket = io(process.env.REACT_APP_SERVER_URL, {
+            query: {
+              socketType: 'sender'
+            }
+          });
         this.socket.on('connect', () => {
-            this.socket.emit('joinSenders');
             console.log("Connected to server socket.io");
         });
 
         this.socket.on('disconnect', () => {
             console.log("Disconnected from server socket.io");
         });
-          
+            
         this.interval = setInterval(() => {
             this.sendData();
         }, 1000/5);
     }
     
     sendData(){
+        if(!this.socket){
+            return;
+        }
         if(!this.state.isPositionOutside && this.state.isActive){
             let data = [this.state.activeXProportion, this.state.activeYProportion];
             if(this.socket.connected){

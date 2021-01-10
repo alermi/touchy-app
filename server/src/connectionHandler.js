@@ -1,4 +1,9 @@
 const RECEIVER_CHANNEL_NAME = 'receivers-room';
+var admin = require('firebase-admin');
+var serviceAccount = require("../serviceAccountKey.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 class ConnectionData {
     constructor(connectionTime, lastX, lastY, isActive){
@@ -10,7 +15,7 @@ class ConnectionData {
 }
 
 class ConnectionHandler{
-    constructor(server, maxReceiversCount, maxSendersCount, undecidedTimeout){
+    constructor(server, maxReceiversCount, maxSendersCount){
         // this.server = server;
         this.receivers = [];
         this.io = require('socket.io')(server, {
@@ -30,10 +35,8 @@ class ConnectionHandler{
         this.interval = false;
         this.currReceiversCount = 0;
         this.currSendersCount = 0;
-        this.undecidedConnections = new Map();
         this.maxReceiversCount = maxReceiversCount;
         this.maxSendersCount = maxSendersCount;
-        this.undecidedTimeout = undecidedTimeout;
     }
 
     handleNewConnection(socket){
@@ -52,33 +55,32 @@ class ConnectionHandler{
             socket.disconnect(true);
             return;
         }
-        this.setTimerForUndecidedSocket(socket);
+
+        let query = socket.handshake.query;
+        var socketType = query['socketType'];
+        switch(socketType){
+            case 'receiver':
+                this.handleJoinReceiversRequest(socket);  
+                break;
+            case 'sender':
+                this.handleJoinSendersRequest(socket);  
+                break;
+            default:
+                console.log("New connection socketType query did not match either options. Disconnecting.");
+                socket.disconnect();
+                return;
+        }
+
         console.log('Client ' + socket.id + ' connected');
 
         socket.on('message', data => {
             this.handleNewMessage(socket, data);
         });
         
-        socket.on('joinSenders', () => {
-            this.handleJoinSendersRequest(socket);  
-        })
-
-        socket.on('joinReceivers', () => {
-            this.handleJoinReceiversRequest(socket);  
-        })
         
         socket.on('disconnect', (reason) => {
             this.handleDisconnect(socket, reason);
         });
-    }
-
-    setTimerForUndecidedSocket(socket){
-        //TODO: Check if it is already in the undecidedConnections.
-        let newTimeout = setTimeout(() => {
-            this.handleUndecidedConnectionTimeout(socket);
-        }, this.undecidedTimeout);
-
-        this.undecidedConnections.set(socket.id, {socket: socket, timeout: newTimeout});
     }
 
     handleNewMessage(socket, data){
@@ -103,6 +105,8 @@ class ConnectionHandler{
     }
 
     handleDisconnect(socket, reason){
+        //TODO: Check handshake query type and remove from that structure instead of calling
+        // unknown type clean. Delete unknown type clean.
         this.cleanUnknownTypeSocketData(socket, true);
         if(!this.checkIfShouldSend() && this.interval != false){
             this.stopSending();
@@ -111,19 +115,6 @@ class ConnectionHandler{
     }
 
     handleJoinSendersRequest(socket){
-        //TODO: Check if it was previously in receivers. Disconnect if so.
-        if(this.receivers.includes(socket.id)){
-            console.log("WARNING: Client " + socket.id + " tried to join senders but was previously in receivers. Disconnecting.");
-            socket.disconnect();
-            this.cleanReceiverSocketData(socket, true);
-            return;
-        }
-
-        if(this.sendersMap.has(socket.id)){
-            console.log("WARNING: Client " + socket.id + " tried to join senders but was already in senders.");
-            return;
-        }
-
         if(this.currSendersCount >= this.maxSendersCount){
             if(this.currSendersCount > this.maxSendersCount){ console.log("ERROR: Current senders count is greater than maximum allowed.")};
             console.log("Socket " + socket.id + " tried to join senders but was rejected because receivers are full.");
@@ -132,7 +123,6 @@ class ConnectionHandler{
         }
 
         this.currSendersCount++;
-        this.cleanUndecidedSocketData(socket, true);
         this.sendersMap.set(socket.id, new ConnectionData(Date.now(), 0, 0, false));
         if(this.checkIfShouldSend() && this.interval == false){
             this.startSending();
@@ -141,20 +131,6 @@ class ConnectionHandler{
     }
 
     handleJoinReceiversRequest(socket){
-        //TODO: Check if it was previously in senders. Disconnect if so.
-        if(this.sendersMap.has(socket.id)){
-            console.log("WARNING: Client " + socket.id + " tried to join receivers but was previously in senders. Disconnecting.");
-            socket.disconnect();
-            this.cleanSenderSocketData(socket, true);
-            return;
-        }
-        
-        if(this.receivers.includes(socket.id)){
-            console.log("WARNING: Client " + socket.id + " tried to join receivers but was already in receivers.");
-            return;
-        }
-        this.cleanUndecidedSocketData(socket, true);
-
         if(this.currReceiversCount >= this.maxReceiversCount){
             if(this.currReceiversCount > this.maxReceiversCount){ console.log("ERROR: Current receivers count is greater than maximum allowed.")};
             console.log("Socket " + socket.id + " tried to join receivers but was rejected because receivers are full.");
@@ -162,19 +138,19 @@ class ConnectionHandler{
             return;
         }
         this.currReceiversCount++;
-        //TODO: Fix the rest of this method
         this.receivers.push(socket.id);
         console.log('Client ' + socket.id + ' joined receivers');
 
         socket.join(RECEIVER_CHANNEL_NAME);
 
+        //TODO: Fix the rest of this method
         if(this.checkIfShouldSend() && this.interval == false){
             this.startSending();
         }
-        //TODO: Consider getting rid of if else.
-        else if(!this.checkIfShouldSend() && this.interval != false){
-            this.stopSending();
-        }
+        // //TODO: Consider getting rid of else if.
+        // else if(!this.checkIfShouldSend() && this.interval != false){
+        //     this.stopSending();
+        // }
     }
 
 
@@ -255,18 +231,6 @@ class ConnectionHandler{
         console.log("Stopped sending updates.");
     }
 
-    handleUndecidedConnectionTimeout(socket){
-        console.log("Socket " + socket.id + " did not join senders or receivers and timed out.");
-        if(this.undecidedConnections.has(socket.id)){
-            this.undecidedConnections.delete(socket.id);
-        }
-        else{
-            console.log("WARNING: handleUndecidedConnectionTimeout called on socket that is not in undecidedConnections.");
-        }
-        this.cleanSocketData(socket);
-        socket.disconnect();
-    }
-
     cleanReceiverSocketData(socket, shouldExist){
         if(this.receivers.includes(socket.id)){
             let index = this.receivers.indexOf(socket.id);
@@ -291,24 +255,11 @@ class ConnectionHandler{
         }
         return false;
     }
-
-    cleanUndecidedSocketData(socket, shouldExist){
-        if(this.undecidedConnections.has(socket.id)){
-            clearTimeout(this.undecidedConnections.get(socket.id).timeout);
-            this.undecidedConnections.delete(socket.id);
-            return true;
-        }
-        else if(shouldExist){
-            console.log("WARNING: Tried to clean undecided socket data that was expected to exist but did not.");
-        }
-        return false;
-    }
     
     cleanUnknownTypeSocketData(socket, shouldExist){
         let timesFound = 0;
         if(this.cleanSenderSocketData(socket, false)) timesFound++;
         if(this.cleanReceiverSocketData(socket, false)) timesFound++;
-        if(this.cleanUndecidedSocketData(socket, false)) timesFound++;
         if(timesFound > 1){
             console.log("WARNING: cleanUnknownTypeSocketData found the socket in more than one data structure.");
         }

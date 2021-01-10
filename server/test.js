@@ -1,7 +1,8 @@
 // If setting this to false, make sure the backend server is already started.
 const LOCAL_TEST = true;
 // const LOCAL_TEST = false;
-
+const SOCKET_TYPE_RECEIVER = 'receiver';
+const SOCKET_TYPE_SENDER = 'sender';
 const DEFAULT_X_VALUE = 0;
 const DEFAULT_Y_VALUE = 0;
 const DEFAULT_IS_ACTIVE_VALUE = false;
@@ -23,7 +24,7 @@ before(() => {
     app.set('port', port);
     server = http.createServer(app);
     var ConnectionHandler = require('./src/connectionHandler');
-    connectionHandler = new ConnectionHandler(server, 5, 100, 4000);
+    connectionHandler = new ConnectionHandler(server, 5, 100);
     server.listen(port);
     app.set('server', server);
     serverURL = "http://localhost:" + port + "/";
@@ -46,16 +47,18 @@ describe('Single sender single receiver, sender connects first', function() {
   
   beforeEach(() => {
     if(ioSend == null || !ioSend.connected){
-      ioSend = io(serverURL);
-      ioSend.on('connect', () => {
-        ioSend.emit('joinSenders');
+      ioSend = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_SENDER
+        }
       });
     }
 
     if(ioReceive == null || !ioReceive.connected){
-      ioReceive = io(serverURL);
-      ioReceive.on('connect', () => {
-        ioReceive.emit('joinReceivers');
+      ioReceive = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_RECEIVER
+        }
       });
     }
   });
@@ -74,7 +77,6 @@ describe('Single sender single receiver, sender connects first', function() {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
-    ioSend.emit('joinSenders');
     setTimeout(() => {
       ioSend.send([randX, randY]);
     }, WAIT_TIME_TO_BE_REGISTERED);
@@ -170,7 +172,7 @@ describe('Single sender single receiver, sender connects first', function() {
 
   it('Ignore multiple requests to join receivers', done => {
     // Extra join receivers request
-    ioReceive.emit('joinReceivers');
+    // ioReceive.emit('joinReceivers');
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
@@ -181,7 +183,7 @@ describe('Single sender single receiver, sender connects first', function() {
     let receivedValidMessage = false;
     ioReceive.on('message', data => {
       // Extra join receivers request
-      ioReceive.emit('joinReceivers');
+      // ioReceive.emit('joinReceivers');
       if(!receivedValidMessage && data[3] == true){
         assert.strictEqual(data[0], ioSend.id);
         assert.strictEqual(data[1], randX);
@@ -222,17 +224,21 @@ describe('Single sender single receiver, receiver connects first', function() {
     const randX = Math.random();
     const randY = Math.random();
     if(ioReceive == null || !ioReceive.connected){
-      ioReceive = io(serverURL);
-      ioReceive.on('connect', () => {
-        ioReceive.emit('joinReceivers');
+      ioReceive = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_RECEIVER
+        }
       });
     }
     setTimeout(()=>{
       if(ioSend == null || !ioSend.connected){
-        ioSend = io(serverURL);
+        ioSend = io(serverURL, {
+          query: {
+            socketType: SOCKET_TYPE_SENDER
+          }
+        });
       }
       ioSend.on('connect', () => {
-        ioSend.emit("joinSenders");
         setTimeout(() => {
           ioSend.send([randX, randY]);
         }, WAIT_TIME_TO_BE_REGISTERED)
@@ -267,17 +273,21 @@ describe('Single sender single receiver, receiver connects first', function() {
 
   it('Ignore invalid messages', done => {
     if(ioReceive == null || !ioReceive.connected){
-      ioReceive = io(serverURL);
-      ioReceive.on('connect', () => {
-        ioReceive.emit('joinReceivers');
+      ioReceive = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_RECEIVER
+        }
       });
     }
     setTimeout(()=>{
       if(ioSend == null || !ioSend.connected){
-        ioSend = io(serverURL);
+        ioSend = io(serverURL, {
+          query: {
+            socketType: SOCKET_TYPE_SENDER
+          }
+        });
       }
       ioSend.on('connect', () => {
-        ioSend.emit("joinSenders");
         setTimeout(() => {
           // Invalid messages
           ioSend.send([0, 2]);
@@ -317,9 +327,10 @@ describe('Single sender single receiver, receiver connects first', function() {
 describe('Single receiver, no senders', function() {
   this.timeout(11000);
   it('The receiver should not receive any messages', (done) => {
-    let ioReceive = io(serverURL);
-    ioReceive.on('connect', () => {
-      ioReceive.emit('joinReceivers');
+    let ioReceive = io(serverURL, {
+      query: {
+        socketType: SOCKET_TYPE_RECEIVER
+      }
     });
 
     ioReceive.on('message', data => {
@@ -352,14 +363,15 @@ describe('Single receiver, no senders', function() {
 describe('Multiple receivers, no senders', function() {
   this.timeout(10000);
   it('The receivers should not receive any messages', (done) => {
-    let ioReceive1 = io(serverURL);
-    let ioReceive2 = io(serverURL);
-    ioReceive1.on('connect', () => {
-      ioReceive1.emit('joinReceivers');
+    let ioReceive1 = io(serverURL, {
+      query: {
+        socketType: SOCKET_TYPE_RECEIVER
+      }
     });
-
-    ioReceive2.on('connect', () => {
-      ioReceive2.emit('joinReceivers');
+    let ioReceive2 = io(serverURL, {
+      query: {
+        socketType: SOCKET_TYPE_RECEIVER
+      }
     });
 
     ioReceive1.on('message', data => {
@@ -400,9 +412,10 @@ describe('Multiple senders, multiple receivers', function() {
   beforeEach(() => {
     senders = [];
     for(let i = 0; i < sendersCount; i++){
-      let tempSender = io(serverURL);
-      tempSender.on('connect', () => {
-        tempSender.emit('joinSenders');
+      let tempSender = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_SENDER
+        }
       });
       senders.push({
         socket: tempSender,
@@ -412,10 +425,12 @@ describe('Multiple senders, multiple receivers', function() {
     }
     receivers = [];
     for(let i = 0; i < receiversCount; i++){
-      let tempReceiver = io(serverURL);
-      tempReceiver.on('connect', () => {
-        tempReceiver.emit('joinReceivers');
+      let tempReceiver = io(serverURL, {
+        query: {
+          socketType: SOCKET_TYPE_RECEIVER
+        }
       });
+      
       receivers.push(tempReceiver);
     }
   });
@@ -464,7 +479,6 @@ describe('Multiple senders, multiple receivers', function() {
           receivedValidMessagesCount++;
           // Stop when we received 10 messages per receiver.
           // TODO: Check if all receivers actually received messages
-          // console.log("Receiver " + i + " received a message. receivedValidMessagesCount=" + receivedValidMessagesCount);
           if(receivedValidMessagesCount == (receiversCount * 10)){
             senders.forEach((sender) => { sender.socket.close(); });
             receivers.forEach((receiver) => { receiver.close(); });
