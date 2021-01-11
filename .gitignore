@@ -34,3 +34,6 @@ yarn-error.log*
 .env
 
 .nyc_output
+
+#firebase service account key
+server/serviceAccountKey.json

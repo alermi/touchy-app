@@ -4,9 +4,11 @@ import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import { io } from "socket.io-client";
 
+let handleAuthStateChangeHasBeenCalled = false;
 class ActionBox extends Component {
     constructor(props) {
         super(props);
+        this.interval = false;
         this.state = {
             activeXProportion: 0,
             activeYProportion: 0,
@@ -19,13 +21,45 @@ class ActionBox extends Component {
         }
         this.onPositionChanged = this.onPositionChanged.bind(this);
         this.onActivationChanged = this.onActivationChanged.bind(this);
+        this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
 
+        this.props.firebase.auth().onIdTokenChanged(this.handleAuthStateChange);
     }
-    componentDidMount() {
-        // const { firebase } = this.props;
-        // //TODO: Consider changing this forceRefresh parameter
-        // const idToken = await firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
-            
+    handleAuthStateChange(user){
+        // This flag prevents the initial run to initialize the socket
+        if (!handleAuthStateChangeHasBeenCalled){
+            handleAuthStateChangeHasBeenCalled = true;
+            return;
+        }
+        if (user) {
+            console.log('Signed in at actionBox');
+            this.handleUserSignIn(user);
+        } else {
+            console.log('Signed out at actionBox');
+            this.cleanUpSocket();
+            this.props.history.push('/login');
+        }
+    }
+    cleanUpSocket(){
+        if(this.socket && this.socket.connected){
+            this.socket.disconnect();
+            console.log('Socket disconnected');
+        }
+        if(this.interval !== false){
+            clearInterval(this.interval);
+            this.interval = false;
+            console.log('Cleaned up interval');
+        }
+    }
+
+    handleUserSignIn(user){
+        this.cleanUpSocket();
+        user.getIdToken(/* forceRefresh */ false).then((token)=>{
+            this.initializeSocket(token);
+        });
+    }
+
+    initializeSocket(token){
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
             query: {
               socketType: 'sender'
@@ -42,6 +76,7 @@ class ActionBox extends Component {
         this.interval = setInterval(() => {
             this.sendData();
         }, 1000/5);
+        console.log('Initilized socket');
     }
     
     sendData(){
@@ -54,11 +89,6 @@ class ActionBox extends Component {
                 this.socket.send(data);
             }
         }
-    }
-
-    componentWillUnmount(){
-        this.socket.disconnect();
-        clearInterval(this.interval);
     }
 
     onPositionChanged(e){
@@ -82,7 +112,7 @@ class ActionBox extends Component {
             this.sendData();
         }
     }
-
+    
     render(){
         return (
         <div className="Action-box">          
