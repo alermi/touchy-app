@@ -6,18 +6,18 @@ class Login extends Component {
         super(props);
         this.uiConfig = {
             signInSuccessUrl: '/',
-            // callbacks: {
-            // signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-            //     var user = authResult.user;
-            //     var credential = authResult.credential;
-            //     console.log('User ' + user + ' signed in successfully with credential: ' + credential);
-            //     return true;
-            // },
+            callbacks: {
+            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                // var user = authResult.user;
+                // var credential = authResult.credential;
+                // console.log('User ' + user + ' signed in successfully with credential: ' + credential);
+                return true;
+            },
             // signInFailure: function(error) {
             //     console.log('Failed to sign in.');
             //     //TODO: Handle the sign in failure
             // }
-            // },
+            },
             signInOptions: [
                 this.props.firebase.auth.GoogleAuthProvider.PROVIDER_ID,
                 this.props.firebase.auth.FacebookAuthProvider.PROVIDER_ID,
