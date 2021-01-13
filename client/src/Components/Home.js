@@ -9,7 +9,6 @@ class Home extends Component {
 
     handleSignOutButtonClick(){
         this.props.firebase.auth().signOut();
-        this.props.history.push('/login')
     }
     render() {
         return (
