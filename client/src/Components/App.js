@@ -14,20 +14,20 @@ firebase.initializeApp({
 
 class App extends Component {
 
-  render(){
+  render() {
     return (
-        <div className="App" style={{ touchAction: 'none' }}>
-          <Switch>
-              <Route 
-                exact path='/login' 
-                render={(props) => <Login {...props} firebase={firebase} />}
-              />
-              <Route 
-                exact path='/' 
-                render={(props) => <Home {...props} firebase={firebase} />}
-              />
-          </Switch>
-        </div>
+      <div className="App" style={{ touchAction: 'none' }}>
+        <Switch>
+          <Route
+            exact path='/login'
+            render={(props) => <Login {...props} firebase={firebase} />}
+          />
+          <Route
+            exact path='/'
+            render={(props) => <Home {...props} firebase={firebase} />}
+          />
+        </Switch>
+      </div>
     )
   }
 }

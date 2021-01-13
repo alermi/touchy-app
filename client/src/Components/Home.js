@@ -2,22 +2,22 @@ import React, { Component } from 'react'
 import ActionBox from './ActionBox'
 
 class Home extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.handleSignOutButtonClick = this.handleSignOutButtonClick.bind(this);
     }
 
-    handleSignOutButtonClick(){
+    handleSignOutButtonClick() {
         this.props.firebase.auth().signOut();
     }
     render() {
         return (
-            <div>            
+            <div>
                 <header className="App-header">
                     <p>Touch the box to interact</p>
                 </header>
-                <div style={{marginLeft: '10%', marginRight: '10%'}}>
-                    <ActionBox history={this.props.history} firebase={this.props.firebase}/>
+                <div style={{ marginLeft: '10%', marginRight: '10%' }}>
+                    <ActionBox history={this.props.history} firebase={this.props.firebase} />
                 </div>
                 <button onClick={this.handleSignOutButtonClick}>Sign out</button>
             </div>
@@ -25,4 +25,4 @@ class Home extends Component {
     }
 }
 
-export default  Home;
+export default Home;

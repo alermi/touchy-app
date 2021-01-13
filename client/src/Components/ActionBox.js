@@ -25,7 +25,7 @@ class ActionBox extends Component {
 
         this.props.firebase.auth().onAuthStateChanged(this.handleAuthStateChange);
     }
-    handleAuthStateChange(user){
+    handleAuthStateChange(user) {
         // This flag prevents the initial run to initialize the socket
         // if (!handleAuthStateChangeHasBeenCalled){
         //     handleAuthStateChangeHasBeenCalled = true;
@@ -40,31 +40,31 @@ class ActionBox extends Component {
             this.props.history.push('/login');
         }
     }
-    cleanUpSocket(){
-        if(this.socket && this.socket.connected){
+    cleanUpSocket() {
+        if (this.socket && this.socket.connected) {
             this.socket.disconnect();
             console.log('Socket disconnected');
         }
-        if(this.interval !== false){
+        if (this.interval !== false) {
             clearInterval(this.interval);
             this.interval = false;
             console.log('Cleaned up interval');
         }
     }
 
-    handleUserSignIn(user){
+    handleUserSignIn(user) {
         this.cleanUpSocket();
-        user.getIdToken(/* forceRefresh */ false).then((token)=>{
+        user.getIdToken(/* forceRefresh */ false).then((token) => {
             this.initializeSocket(token);
         });
     }
 
-    initializeSocket(token){
+    initializeSocket(token) {
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
             query: {
-              socketType: 'sender'
+                socketType: 'sender'
             }
-          });
+        });
         this.socket.on('connect', () => {
             console.log("Connected to server socket.io");
         });
@@ -72,63 +72,64 @@ class ActionBox extends Component {
         this.socket.on('disconnect', () => {
             console.log("Disconnected from server socket.io");
         });
-            
+
         this.interval = setInterval(() => {
             this.sendData();
-        }, 1000/5);
+        }, 1000 / 5);
         console.log('Initilized socket');
     }
-    
-    sendData(){
-        if(!this.socket){
+
+    sendData() {
+        if (!this.socket) {
             return;
         }
-        if(!this.state.isPositionOutside && this.state.isActive){
+        if (!this.state.isPositionOutside && this.state.isActive) {
             let data = [this.state.activeXProportion, this.state.activeYProportion];
-            if(this.socket.connected){
+            if (this.socket.connected) {
                 this.socket.send(data);
             }
         }
     }
 
-    onPositionChanged(e){
-        if(e.elementDimensions != null){
-            this.setState({elementDimensions: e.elementDimensions})
+    onPositionChanged(e) {
+        if (e.elementDimensions != null) {
+            this.setState({ elementDimensions: e.elementDimensions })
         }
 
-        this.setState({isPositionOutside: e.isPositionOutside});
-        if(!e.isPositionOutside){
+        this.setState({ isPositionOutside: e.isPositionOutside });
+        if (!e.isPositionOutside) {
             let x = e.position.x;
             let y = e.position.y;
-            
-            this.setState({activeXProportion: (x / this.state.elementDimensions.width)});
-            this.setState({activeYProportion: (y / this.state.elementDimensions.height)});
+
+            this.setState({ activeXProportion: (x / this.state.elementDimensions.width) });
+            this.setState({ activeYProportion: (y / this.state.elementDimensions.height) });
         }
     }
 
-    onActivationChanged(e){
-        this.setState({isActive: e.isActive});
-        if(e.isActive){
+    onActivationChanged(e) {
+        this.setState({ isActive: e.isActive });
+        if (e.isActive) {
             this.sendData();
         }
     }
-    
-    render(){
+
+    render() {
         return (
-        <div className="Action-box">          
-            <ReactCursorPosition 
-                    style={{width: '100%' }} 
+            <div className="Action-box">
+                <ReactCursorPosition
+                    style={{ width: '100%' }}
                     activationInteractionTouch='touch'
                     onPositionChanged={this.onPositionChanged}
                     onActivationChanged={this.onActivationChanged}>
-                <Cursor className="cursor"/>
-                isActive: {this.state.isActive ? 'true ' : 'false '}  <br/>
-                isPositionOutside: {this.state.isPositionOutside?'true' : 'false'} <br/>
-                x: {this.state.activeXProportion}  <br/>
-                y: {this.state.activeYProportion} <br/>
-            </ReactCursorPosition>
-        </div>
-        )}
+                    <Cursor className="cursor" />
+                isActive: {this.state.isActive ? 'true ' : 'false '}  <br />
+                isPositionOutside: {this.state.isPositionOutside ? 'true' : 'false'} <br />
+                x: {this.state.activeXProportion}  <br />
+                y: {this.state.activeYProportion} <br />
+                </ReactCursorPosition>
+            </div>
+        )
+    }
 }
 
 export default ActionBox;

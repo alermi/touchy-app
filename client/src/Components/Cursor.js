@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 
 class Cursor extends Component {
- 
-    render(){
+
+    render() {
         return <div className='cursor'
             style={{
                 left: this.props.position.x + 'px',

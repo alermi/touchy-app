@@ -6,7 +6,7 @@ admin.initializeApp({
 });
 
 class ConnectionData {
-    constructor(connectionTime, lastX, lastY, isActive){
+    constructor(connectionTime, lastX, lastY, isActive) {
         this.connectionTime = connectionTime;
         this.lastX = lastX;
         this.lastY = lastY;
@@ -14,14 +14,14 @@ class ConnectionData {
     }
 }
 
-class ConnectionHandler{
-    constructor(server, maxReceiversCount, maxSendersCount){
+class ConnectionHandler {
+    constructor(server, maxReceiversCount, maxSendersCount) {
         // this.server = server;
         this.receivers = [];
         this.io = require('socket.io')(server, {
             cors: {
-              origin: process.env.CLIENT_URL,
-              methods: ["GET", "POST"]
+                origin: process.env.CLIENT_URL,
+                methods: ["GET", "POST"]
             }
         });
         console.log("CORS at " + process.env.CLIENT_URL);
@@ -39,17 +39,17 @@ class ConnectionHandler{
         this.maxSendersCount = maxSendersCount;
     }
 
-    handleNewConnection(socket){
+    handleNewConnection(socket) {
         //TODO: Check max connection count
         //TODO: Maybe move these checks into the join request methods. Maybe not. Since we will be adding to the wait list, might get messy
-        if(this.sendersMap.has(socket.id)){
+        if (this.sendersMap.has(socket.id)) {
             console.log("WARNING: Sender " + socket.id + " tried to connect again. Closing connection.");
             this.cleanSenderSocketData(socket, true);
             socket.disconnect(true);
             return;
         }
 
-        if(this.receivers.includes(socket.id)){
+        if (this.receivers.includes(socket.id)) {
             console.log("WARNING: Receiver " + socket.id + " tried to connect again. Closing connection.");
             this.cleanReceiverSocketData(socket, true);
             socket.disconnect(true);
@@ -58,12 +58,12 @@ class ConnectionHandler{
 
         let query = socket.handshake.query;
         var socketType = query['socketType'];
-        switch(socketType){
+        switch (socketType) {
             case 'receiver':
-                this.handleJoinReceiversRequest(socket);  
+                this.handleJoinReceiversRequest(socket);
                 break;
             case 'sender':
-                this.handleJoinSendersRequest(socket);  
+                this.handleJoinSendersRequest(socket);
                 break;
             default:
                 console.log("New connection socketType query did not match either options. Disconnecting.");
@@ -76,26 +76,26 @@ class ConnectionHandler{
         socket.on('message', data => {
             this.handleNewMessage(socket, data);
         });
-        
-        
+
+
         socket.on('disconnect', (reason) => {
             this.handleDisconnect(socket, reason);
         });
     }
 
-    handleNewMessage(socket, data){
+    handleNewMessage(socket, data) {
         //TODO: Format check
-        if(this.receivers.includes(socket.id)){
+        if (this.receivers.includes(socket.id)) {
             console.log("WARNING: A receiver sent a message. Ignored.");
             return;
         }
 
-        if(!this.sendersMap.has(socket.id)){
+        if (!this.sendersMap.has(socket.id)) {
             console.log("WARNING: Socket that is not in senders or receivers sent a message. Ignored.");
             return;
         }
 
-        if(!this.verifyReceivedDataFormat(data)){
+        if (!this.verifyReceivedDataFormat(data)) {
             return;
         }
 
@@ -104,19 +104,19 @@ class ConnectionHandler{
         this.sendersMap.set(socket.id, newConnectionData);
     }
 
-    handleDisconnect(socket, reason){
+    handleDisconnect(socket, reason) {
         //TODO: Check handshake query type and remove from that structure instead of calling
         // unknown type clean. Delete unknown type clean.
         this.cleanUnknownTypeSocketData(socket, true);
-        if(!this.checkIfShouldSend() && this.interval != false){
+        if (!this.checkIfShouldSend() && this.interval != false) {
             this.stopSending();
         }
         console.log('Client ' + socket.id + ' disconnected for reason: ' + reason);
     }
 
-    handleJoinSendersRequest(socket){
-        if(this.currSendersCount >= this.maxSendersCount){
-            if(this.currSendersCount > this.maxSendersCount){ console.log("ERROR: Current senders count is greater than maximum allowed.")};
+    handleJoinSendersRequest(socket) {
+        if (this.currSendersCount >= this.maxSendersCount) {
+            if (this.currSendersCount > this.maxSendersCount) { console.log("ERROR: Current senders count is greater than maximum allowed.") };
             console.log("Socket " + socket.id + " tried to join senders but was rejected because receivers are full.");
             socket.disconnect();
             return;
@@ -124,15 +124,15 @@ class ConnectionHandler{
 
         this.currSendersCount++;
         this.sendersMap.set(socket.id, new ConnectionData(Date.now(), 0, 0, false));
-        if(this.checkIfShouldSend() && this.interval == false){
+        if (this.checkIfShouldSend() && this.interval == false) {
             this.startSending();
         }
         console.log('Client ' + socket.id + ' joined senders');
     }
 
-    handleJoinReceiversRequest(socket){
-        if(this.currReceiversCount >= this.maxReceiversCount){
-            if(this.currReceiversCount > this.maxReceiversCount){ console.log("ERROR: Current receivers count is greater than maximum allowed.")};
+    handleJoinReceiversRequest(socket) {
+        if (this.currReceiversCount >= this.maxReceiversCount) {
+            if (this.currReceiversCount > this.maxReceiversCount) { console.log("ERROR: Current receivers count is greater than maximum allowed.") };
             console.log("Socket " + socket.id + " tried to join receivers but was rejected because receivers are full.");
             socket.disconnect();
             return;
@@ -144,7 +144,7 @@ class ConnectionHandler{
         socket.join(RECEIVER_CHANNEL_NAME);
 
         //TODO: Fix the rest of this method
-        if(this.checkIfShouldSend() && this.interval == false){
+        if (this.checkIfShouldSend() && this.interval == false) {
             this.startSending();
         }
         // //TODO: Consider getting rid of else if.
@@ -154,38 +154,38 @@ class ConnectionHandler{
     }
 
 
-    verifyReceivedDataFormat(data){
+    verifyReceivedDataFormat(data) {
         //TODO: Send corrupt data and see if this catches all cases without crashing.
-        if( !Array.isArray(data) || data.length != 2 || (typeof data[0] != 'number') || (typeof data[1] != 'number') ){
+        if (!Array.isArray(data) || data.length != 2 || (typeof data[0] != 'number') || (typeof data[1] != 'number')) {
             console.log("WARNING: Data received is in wrong format.")
             return false;
         }
-        if(data[0] > 1 || data[0] < 0 || data[1] > 1 || data[1] < 0){
+        if (data[0] > 1 || data[0] < 0 || data[1] > 1 || data[1] < 0) {
             console.log("WARNING: Data received is out of range of 0 to 1");
             return false;
         }
         return true;
     }
 
-    sendDataToReceivers(){
-        if(this.sendersMap.size <= 0 || this.receivers.length <= 0){
+    sendDataToReceivers() {
+        if (this.sendersMap.size <= 0 || this.receivers.length <= 0) {
             // Returning, there is no receivers or senders.
             console.log("WARNING: sendDataToReceivers should not have been called since either senders or receivers is empty.");
             return;
         }
         var data = [];
-        for(var [key, val] of this.sendersMap){
-            if(key == null){
+        for (var [key, val] of this.sendersMap) {
+            if (key == null) {
                 console.log("WARNING: Key in sendersMap was null");
                 continue;
             }
 
-            if(val == null){
+            if (val == null) {
                 console.log("WARNING: Value of key " + key + " in sendersMap is null.");
                 continue;
             }
 
-            if(!val instanceof ConnectionData){
+            if (!val instanceof ConnectionData) {
                 console.log("WARNING: Value of key " + key + " in sendersMap is not of type ConnectionData. (" + typeof val + ")");
                 continue;
             }
@@ -195,7 +195,7 @@ class ConnectionHandler{
             data.push(val.lastY);
             data.push(val.isActive);
             data.push(val.connectionTime);
-            
+
             val.isActive = false;
             this.sendersMap.set(key, val);
         }
@@ -203,26 +203,26 @@ class ConnectionHandler{
         this.io.to(RECEIVER_CHANNEL_NAME).emit('message', data);
     }
 
-    checkIfShouldSend(){
-        if(this.receivers.length > 0 && this.sendersMap.size > 0){
+    checkIfShouldSend() {
+        if (this.receivers.length > 0 && this.sendersMap.size > 0) {
             return true;
         }
         else return false;
     }
 
-    startSending(){
-        if(this.interval != false){
+    startSending() {
+        if (this.interval != false) {
             console.log("WARNING: Interval attempted to start while already running.");
             return;
         }
         this.interval = setInterval(() => {
             this.sendDataToReceivers();
-        }, 1000/5);
+        }, 1000 / 5);
         console.log("Started sending updates.");
     }
 
-    stopSending(){
-        if(this.interval == false){
+    stopSending() {
+        if (this.interval == false) {
             console.log("WARNING: Interval attempted to stop while already not running.");
             return;
         }
@@ -231,39 +231,39 @@ class ConnectionHandler{
         console.log("Stopped sending updates.");
     }
 
-    cleanReceiverSocketData(socket, shouldExist){
-        if(this.receivers.includes(socket.id)){
+    cleanReceiverSocketData(socket, shouldExist) {
+        if (this.receivers.includes(socket.id)) {
             let index = this.receivers.indexOf(socket.id);
             this.receivers.splice(index, 1);
             this.currReceiversCount--;
             return true;
         }
-        else if(shouldExist){
+        else if (shouldExist) {
             console.log("WARNING: Tried to clean receiver data that was expected to exist but did not.");
         }
         return false;
     }
 
-    cleanSenderSocketData(socket, shouldExist){
-        if(this.sendersMap.has(socket.id)){
+    cleanSenderSocketData(socket, shouldExist) {
+        if (this.sendersMap.has(socket.id)) {
             this.sendersMap.delete(socket.id);
             this.currSendersCount--;
             return true;
         }
-        else if(shouldExist){
+        else if (shouldExist) {
             console.log("WARNING: Tried to clean receiver data that was expected to exist but did not.");
         }
         return false;
     }
-    
-    cleanUnknownTypeSocketData(socket, shouldExist){
+
+    cleanUnknownTypeSocketData(socket, shouldExist) {
         let timesFound = 0;
-        if(this.cleanSenderSocketData(socket, false)) timesFound++;
-        if(this.cleanReceiverSocketData(socket, false)) timesFound++;
-        if(timesFound > 1){
+        if (this.cleanSenderSocketData(socket, false)) timesFound++;
+        if (this.cleanReceiverSocketData(socket, false)) timesFound++;
+        if (timesFound > 1) {
             console.log("WARNING: cleanUnknownTypeSocketData found the socket in more than one data structure.");
         }
-        if(shouldExist && timesFound == 0){
+        if (shouldExist && timesFound == 0) {
             console.log("WARNING: Tried to clean unknown type socket " + socket.id + " data that was expected to exist but did not.");
         }
     }
