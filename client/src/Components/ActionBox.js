@@ -4,7 +4,6 @@ import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import { io } from "socket.io-client";
 
-// let handleAuthStateChangeHasBeenCalled = false;
 class ActionBox extends Component {
     constructor(props) {
         super(props);
@@ -22,15 +21,13 @@ class ActionBox extends Component {
         this.onPositionChanged = this.onPositionChanged.bind(this);
         this.onActivationChanged = this.onActivationChanged.bind(this);
         this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
+    }
 
+    componentDidMount(){
         this.props.firebase.auth().onAuthStateChanged(this.handleAuthStateChange);
     }
+
     handleAuthStateChange(user) {
-        // This flag prevents the initial run to initialize the socket
-        // if (!handleAuthStateChangeHasBeenCalled){
-        //     handleAuthStateChangeHasBeenCalled = true;
-        //     return;
-        // }
         if (user) {
             console.log('Signed in at actionBox');
             this.handleUserSignIn(user);
