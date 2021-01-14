@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import './App.css';
 import firebase from 'firebase'
 import { Switch, Route } from 'react-router-dom';
@@ -12,24 +12,21 @@ firebase.initializeApp({
   authDomain: 'ait-krea.firebaseapp.com'
 })
 
-class App extends Component {
-
-  render() {
-    return (
-      <div className="App" style={{ touchAction: 'none' }}>
-        <Switch>
-          <Route
-            exact path='/login'
-            render={(props) => <Login {...props} firebase={firebase} />}
-          />
-          <Route
-            exact path='/'
-            render={(props) => <Home {...props} firebase={firebase} />}
-          />
-        </Switch>
-      </div>
-    )
-  }
+const App = () => {
+  return (
+    <div className="App" style={{ touchAction: 'none' }}>
+      <Switch>
+        <Route
+          exact path='/login'
+          render={(props) => <Login {...props} firebase={firebase} />}
+        />
+        <Route
+          exact path='/'
+          render={(props) => <Home {...props} firebase={firebase} />}
+        />
+      </Switch>
+    </div>
+  )
 }
 
 export default App;

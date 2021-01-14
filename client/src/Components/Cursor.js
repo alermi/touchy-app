@@ -1,16 +1,13 @@
-import React, { Component } from "react";
+import React from "react";
 
-class Cursor extends Component {
-
-    render() {
-        return <div className='cursor'
-            style={{
-                left: this.props.position.x + 'px',
-                top: this.props.position.y + 'px',
-                opacity: (this.props.isActive && !this.props.isPositionOutside) ? 1 : 0
-            }}
-        />
-    }
+const Cursor = (props) => {
+    return (<div className='cursor'
+        style={{
+            left: props.position.x + 'px',
+            top: props.position.y + 'px',
+            opacity: (props.isActive && !props.isPositionOutside) ? 1 : 0
+        }}
+    />)
 }
 
 export default Cursor;
