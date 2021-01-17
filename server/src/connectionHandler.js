@@ -27,11 +27,45 @@ class ConnectionHandler {
         console.log("CORS at " + process.env.CLIENT_URL);
 
         this.sendersMap = new Map();
+        this.idToSocketMap = new Map();
 
         this.io.on('connection', socket => {
             this.handleNewConnection(socket);
         });
 
+        this.io.use((socket, next) => {
+            //TODO: REMOVE THIS WHEN IMPLEMENTED RECEIVER TOKENS TOO.
+            if (socket.handshake.query['socketType'] === 'receiver') {
+                next();
+            }
+
+            const token = socket.handshake.auth.token;
+            if (token == null) {
+                next(new Error("Token not provided."));
+                return;
+            }
+            admin.auth()
+                .verifyIdToken(token)
+                .then((decodedToken) => {
+                    const uid = decodedToken.uid;
+                    // TODO; check for privileges if receiver.
+                    let returnedSocket = this.idToSocketMap.get(uid);
+                    if (returnedSocket !== undefined) {
+                        console.log('Socket ' + socket.id + ' connected from a user that was already connected (' + returnedSocket.id + '). Shutting down previous socket.');
+                        //TODO: Send shut down event to returnedSocket.
+                        returnedSocket.emit("newLogIn");
+                        returnedSocket.disconnect();
+                    }
+                    socket.uid = uid;
+                    this.idToSocketMap.set(uid, socket);
+                    next();
+                })
+                //TODO: Test authentication fail case.
+                .catch((error) => {
+                    console.log("Authentication for socket " + socket.id + " failed. Error: " + error);
+                    next(new Error("Authentication failed."));
+                });
+        })
         this.interval = false;
         this.currReceiversCount = 0;
         this.currSendersCount = 0;
@@ -44,14 +78,14 @@ class ConnectionHandler {
         //TODO: Maybe move these checks into the join request methods. Maybe not. Since we will be adding to the wait list, might get messy
         if (this.sendersMap.has(socket.id)) {
             console.log("WARNING: Sender " + socket.id + " tried to connect again. Closing connection.");
-            this.cleanSenderSocketData(socket, true);
+            // this.cleanSenderSocketData(socket, true);
             socket.disconnect(true);
             return;
         }
 
         if (this.receivers.includes(socket.id)) {
             console.log("WARNING: Receiver " + socket.id + " tried to connect again. Closing connection.");
-            this.cleanReceiverSocketData(socket, true);
+            // this.cleanReceiverSocketData(socket, true);
             socket.disconnect(true);
             return;
         }
@@ -79,6 +113,8 @@ class ConnectionHandler {
 
 
         socket.on('disconnect', (reason) => {
+            //TODO: Remove this log
+            console.log('On Disconnect called for socket ' + socket.id);
             this.handleDisconnect(socket, reason);
         });
     }
@@ -114,6 +150,21 @@ class ConnectionHandler {
         console.log('Client ' + socket.id + ' disconnected for reason: ' + reason);
     }
 
+    //TODO: Test that this cleans up things properly.
+    cleanUidMapping(socket) {
+        let uid = socket.uid;
+        if (uid == null) {
+            console.log("ERROR: CleanUidMapping called on a socket that does not have a uid assigned in the object");
+        }
+        let returnedSocket = this.idToSocketMap.get(uid);
+        if (returnedSocket !== undefined) {
+            if (returnedSocket.connected) {
+                console.log("ERROR: CleanUidMapping called on a socket that is connected.");
+                returnedSocket.disconnect();
+            }
+            this.idToSocketMap.remove(uid);
+        }
+    }
     handleJoinSendersRequest(socket) {
         if (this.currSendersCount >= this.maxSendersCount) {
             if (this.currSendersCount > this.maxSendersCount) { console.log("ERROR: Current senders count is greater than maximum allowed.") };
@@ -127,7 +178,7 @@ class ConnectionHandler {
         if (this.checkIfShouldSend() && this.interval == false) {
             this.startSending();
         }
-        console.log('Client ' + socket.id + ' joined senders');
+        console.log('Client ' + socket.id + ' joined senders. Num senders now: ' + this.sendersMap.size);
     }
 
     handleJoinReceiversRequest(socket) {
@@ -139,7 +190,7 @@ class ConnectionHandler {
         }
         this.currReceiversCount++;
         this.receivers.push(socket.id);
-        console.log('Client ' + socket.id + ' joined receivers');
+        console.log('Client ' + socket.id + ' joined receivers. Num receivers now: ' + this.receivers.length);
 
         socket.join(RECEIVER_CHANNEL_NAME);
 
@@ -161,7 +212,8 @@ class ConnectionHandler {
             return false;
         }
         if (data[0] > 1 || data[0] < 0 || data[1] > 1 || data[1] < 0) {
-            console.log("WARNING: Data received is out of range of 0 to 1");
+            //TODO: Delete the data print from log
+            console.log("WARNING: Data received is out of range of 0 to 1 (" + data[0] + ", " + data[1] + ")");
             return false;
         }
         return true;

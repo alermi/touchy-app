@@ -60,19 +60,28 @@ class ActionBox extends Component {
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
             query: {
                 socketType: 'sender'
+            },
+            auth: {
+                token: token
             }
         });
         this.socket.on('connect', () => {
-            console.log("Connected to server socket.io");
+            this.interval = setInterval(() => {
+                this.sendData();
+            }, 1000 / 5);
+            console.log("Connected to server socket.io. Started to send messages");
         });
 
         this.socket.on('disconnect', () => {
             console.log("Disconnected from server socket.io");
+            this.cleanUpSocket();
         });
 
-        this.interval = setInterval(() => {
-            this.sendData();
-        }, 1000 / 5);
+        this.socket.on('newLogIn', () => {
+            console.log('Logged in with another socket.');
+            this.props.history.push('/login');
+        });
+
         console.log('Initilized socket');
     }
 
