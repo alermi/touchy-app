@@ -23,7 +23,7 @@ class ActionBox extends Component {
         this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.props.firebase.auth().onAuthStateChanged(this.handleAuthStateChange);
     }
 
@@ -57,6 +57,8 @@ class ActionBox extends Component {
     }
 
     initializeSocket(token) {
+        //TODO: Delete log
+        console.log("Server url: " + process.env.REACT_APP_SERVER_URL);
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
             query: {
                 socketType: 'sender'
@@ -107,10 +109,10 @@ class ActionBox extends Component {
             let x = e.position.x;
             let y = e.position.y;
             // Set if the elementDimensions have been set previously.
-            if(this.state.elementDimensions.width !== -1){
+            if (this.state.elementDimensions.width !== -1) {
                 this.setState({ activeXProportion: (x / this.state.elementDimensions.width) });
             }
-            if(this.state.elementDimensions.height !== -1){
+            if (this.state.elementDimensions.height !== -1) {
                 this.setState({ activeYProportion: (y / this.state.elementDimensions.height) });
             }
         }
