@@ -106,9 +106,13 @@ class ActionBox extends Component {
         if (!e.isPositionOutside) {
             let x = e.position.x;
             let y = e.position.y;
-
-            this.setState({ activeXProportion: (x / this.state.elementDimensions.width) });
-            this.setState({ activeYProportion: (y / this.state.elementDimensions.height) });
+            // Set if the elementDimensions have been set previously.
+            if(this.state.elementDimensions.width !== -1){
+                this.setState({ activeXProportion: (x / this.state.elementDimensions.width) });
+            }
+            if(this.state.elementDimensions.height !== -1){
+                this.setState({ activeYProportion: (y / this.state.elementDimensions.height) });
+            }
         }
     }
 
