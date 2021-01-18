@@ -140,6 +140,7 @@ class ConnectionHandler {
         if (!this.checkIfShouldSend() && this.interval != false) {
             this.stopSending();
         }
+        this.cleanUidMapping(socket);
         console.log('Client ' + socket.id + ' disconnected for reason: ' + reason);
     }
 
@@ -155,7 +156,7 @@ class ConnectionHandler {
                 console.log("ERROR: CleanUidMapping called on a socket that is connected.");
                 returnedSocket.disconnect();
             }
-            this.idToSocketMap.remove(uid);
+            this.idToSocketMap.delete(uid);
         }
     }
     handleJoinSendersRequest(socket) {
