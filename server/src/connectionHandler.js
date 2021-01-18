@@ -1,9 +1,4 @@
 const RECEIVER_CHANNEL_NAME = 'receivers-room';
-var admin = require('firebase-admin');
-var serviceAccount = require("../serviceAccountKey.json");
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
 
 class ConnectionData {
     constructor(connectionTime, lastX, lastY, isActive) {
@@ -15,8 +10,7 @@ class ConnectionData {
 }
 
 class ConnectionHandler {
-    constructor(server, maxReceiversCount, maxSendersCount) {
-        // this.server = server;
+    constructor(server, auth, maxReceiversCount, maxSendersCount) {
         this.receivers = [];
         this.io = require('socket.io')(server, {
             cors: {
@@ -44,11 +38,9 @@ class ConnectionHandler {
                 next(new Error("Token not provided."));
                 return;
             }
-            admin.auth()
-                .verifyIdToken(token)
-                .then((decodedToken) => {
-                    const uid = decodedToken.uid;
-                    // TODO; check for privileges if receiver.
+            auth.verifyIdToken(token)
+                .then((uid) => {
+                    // TODO: check for privileges if receiver.
                     let returnedSocket = this.idToSocketMap.get(uid);
                     if (returnedSocket !== undefined) {
                         console.log('Socket ' + socket.id + ' connected from a user that was already connected (' + returnedSocket.id + '). Shutting down previous socket.');
@@ -66,6 +58,7 @@ class ConnectionHandler {
                     next(new Error("Authentication failed."));
                 });
         })
+
         this.interval = false;
         this.currReceiversCount = 0;
         this.currSendersCount = 0;
