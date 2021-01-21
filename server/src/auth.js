@@ -9,9 +9,11 @@ class Authenticator {
     }
 
     verifyIdToken(token) {
-        return admin.auth().verifyIdToken(token).then((decodedToken) => {
-            return decodedToken.uid;
-        });
+        return admin.auth().verifyIdToken(token);
+    }
+
+    setCustomUserClaims(uid, claims) {
+        return admin.auth().setCustomUserClaims(uid, claims);
     }
 }
 

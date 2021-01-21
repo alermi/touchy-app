@@ -84,6 +84,10 @@ class ActionBox extends Component {
             this.props.history.push('/login');
         });
 
+        this.socket.on('connect_error', (err) => {
+            console.log(err);
+        });
+
         console.log('Initilized socket');
     }
 

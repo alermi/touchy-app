@@ -28,33 +28,44 @@ class ConnectionHandler {
         });
 
         this.io.use((socket, next) => {
-            //TODO: REMOVE THIS WHEN IMPLEMENTED RECEIVER TOKENS TOO.
-            if (socket.handshake.query['socketType'] === 'receiver') {
-                next();
-            }
-
             const token = socket.handshake.auth.token;
             if (token == null) {
                 next(new Error("Token not provided."));
                 return;
             }
             auth.verifyIdToken(token)
-                .then((uid) => {
-                    // TODO: check for privileges if receiver.
-                    let returnedSocket = this.idToSocketMap.get(uid);
-                    if (returnedSocket !== undefined) {
-                        console.log('Socket ' + socket.id + ' connected from a user that was already connected (' + returnedSocket.id + '). Shutting down previous socket.');
-                        //TODO: Send shut down event to returnedSocket.
-                        returnedSocket.emit("newLogIn");
-                        returnedSocket.disconnect();
+                .then((decodedToken) => {
+                    const socketType = socket.handshake.query['socketType'];
+                    switch (socketType) {
+                        case 'receiver':
+                            const authorizedToReceive = (decodedToken.artist || decodedToken.admin);
+                            if(authorizedToReceive){
+                                next();
+                            }
+                            else{
+                                next(new Error("User not authorized as a receiver."))
+                            }
+                            break;
+                        case 'sender':
+                            const uid = decodedToken.uid;
+                            let returnedSocket = this.idToSocketMap.get(uid);
+                            if (returnedSocket !== undefined) {
+                                console.log('Socket ' + socket.id + ' connected from a user that was already connected (' + returnedSocket.id + '). Shutting down previous socket.');
+                                returnedSocket.emit("newLogIn");
+                                returnedSocket.disconnect();
+                            }
+                            socket.uid = uid;
+                            this.idToSocketMap.set(uid, socket);
+                            next();
+                            break;
+                        default:
+                            next(new Error("Socket type not provided."));
+                            break;
                     }
-                    socket.uid = uid;
-                    this.idToSocketMap.set(uid, socket);
-                    next();
                 })
                 //TODO: Test authentication fail case.
                 .catch((error) => {
-                    console.log("Authentication for socket " + socket.id + " failed. Error: " + error);
+                    console.log("Authentication for socket " + socket.id + " failed. " + error);
                     next(new Error("Authentication failed."));
                 });
         })
@@ -140,7 +151,10 @@ class ConnectionHandler {
         if (!this.checkIfShouldSend() && this.interval != false) {
             this.stopSending();
         }
-        this.cleanUidMapping(socket);
+        if(socket.handshake.query['socketType'] === 'sender'){
+            this.cleanUidMapping(socket);
+        }
+
         console.log('Client ' + socket.id + ' disconnected for reason: ' + reason);
     }
 
