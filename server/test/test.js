@@ -17,6 +17,7 @@ let tokenGenerator = new TokenGenerator(LOCAL_TEST);
 let serverURL;
 let server;
 let connectionHandler;
+//TODO: Remove the authorization from senders and test the rejection of sockets.
 before(() => {
   if (LOCAL_TEST) {
     // Server setup
@@ -66,6 +67,9 @@ describe('Single sender single receiver, sender connects first', function () {
       ioReceive = io(serverURL, {
         query: {
           socketType: SOCKET_TYPE_RECEIVER
+        },
+        auth: {
+          token: tokenGenerator.getNextToken()
         }
       });
     }
@@ -238,6 +242,9 @@ describe('Single sender single receiver, receiver connects first', function () {
       ioReceive = io(serverURL, {
         query: {
           socketType: SOCKET_TYPE_RECEIVER
+        },
+        auth: {
+          token: tokenGenerator.getNextToken()
         }
       });
     }
@@ -290,6 +297,9 @@ describe('Single sender single receiver, receiver connects first', function () {
       ioReceive = io(serverURL, {
         query: {
           socketType: SOCKET_TYPE_RECEIVER
+        },
+        auth: {
+          token: tokenGenerator.getNextToken()
         }
       });
     }
@@ -343,10 +353,17 @@ describe('Single sender single receiver, receiver connects first', function () {
 
 describe('Single receiver, no senders', function () {
   this.timeout(11000);
+
+  afterEach(() => {
+    tokenGenerator.reset();
+  });
   it('The receiver should not receive any messages', (done) => {
     let ioReceive = io(serverURL, {
       query: {
         socketType: SOCKET_TYPE_RECEIVER
+      },
+      auth: {
+        token: tokenGenerator.getNextToken()
       }
     });
 
@@ -379,15 +396,26 @@ describe('Single receiver, no senders', function () {
 
 describe('Multiple receivers, no senders', function () {
   this.timeout(10000);
+
+  afterEach(() => {
+    tokenGenerator.reset();
+  });
+  
   it('The receivers should not receive any messages', (done) => {
     let ioReceive1 = io(serverURL, {
       query: {
         socketType: SOCKET_TYPE_RECEIVER
+      },
+      auth: {
+        token: tokenGenerator.getNextToken()
       }
     });
     let ioReceive2 = io(serverURL, {
       query: {
         socketType: SOCKET_TYPE_RECEIVER
+      },
+      auth: {
+        token: tokenGenerator.getNextToken()
       }
     });
 
@@ -448,6 +476,9 @@ describe('Multiple senders, multiple receivers', function () {
       let tempReceiver = io(serverURL, {
         query: {
           socketType: SOCKET_TYPE_RECEIVER
+        },
+        auth: {
+          token: tokenGenerator.getNextToken()
         }
       });
 

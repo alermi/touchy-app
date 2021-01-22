@@ -9,7 +9,11 @@ class MockAuthenticator {
                 reject(new Error("Unauthorized"));
             }
             else {
-                resolve(token);
+                resolve({
+                    uid: token,
+                    admin: true,
+                    artist: true
+                });
             }
         })
     }
