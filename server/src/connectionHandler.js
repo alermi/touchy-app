@@ -186,7 +186,7 @@ class ConnectionHandler {
         if (this.checkIfShouldSend() && this.interval == false) {
             this.startSending();
         }
-        console.log('Client ' + socket.id + ' joined senders. Num senders now: ' + this.sendersMap.size);
+        console.log('Client ' + socket.id + ' joined senders (uid: ' + socket.uid + ' ). Num senders now: ' + this.sendersMap.size);
     }
 
     handleJoinReceiversRequest(socket) {
@@ -198,7 +198,7 @@ class ConnectionHandler {
         }
         this.currReceiversCount++;
         this.receivers.push(socket.id);
-        console.log('Client ' + socket.id + ' joined receivers. Num receivers now: ' + this.receivers.length);
+        console.log('Client ' + socket.id + ' joined receivers (uid: ' + socket.uid + ' ). Num receivers now: ' + this.receivers.length);
 
         socket.join(RECEIVER_CHANNEL_NAME);
 
