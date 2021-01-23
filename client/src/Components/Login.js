@@ -19,12 +19,12 @@ class Login extends Component {
                 // }
             },
             signInOptions: [
-                this.props.firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                this.props.firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+                this.props.authWrapper.GoogleAuthProvider.PROVIDER_ID,
+                this.props.authWrapper.FacebookAuthProvider.PROVIDER_ID,
                 {
-                    provider: this.props.firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    provider: this.props.authWrapper.EmailAuthProvider.PROVIDER_ID,
                     // Use email link authentication and do not require password.
-                    signInMethod: this.props.firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+                    signInMethod: this.props.authWrapper.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
                     // Allow the user the ability to complete sign-in cross device, including
                     // the mobile apps specified in the ActionCodeSettings object below.
                     forceSameDevice: false,
@@ -43,7 +43,7 @@ class Login extends Component {
 
     render() {
         return (
-            <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={this.props.firebase.auth()} />
+            <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={this.props.authWrapper.getAuth()} />
         )
     }
 }

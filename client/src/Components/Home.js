@@ -8,9 +8,9 @@ const Home = (props) => {
                 <p>Touch the box to interact</p>
             </header>
             <div style={{ marginLeft: '10%', marginRight: '10%' }}>
-                <ActionBox history={props.history} firebase={props.firebase} />
+                <ActionBox history={props.history} authWrapper={props.authWrapper} />
             </div>
-            <button onClick={() => { props.firebase.auth().signOut() }}>Sign out</button>
+            <button onClick={() => { props.authWrapper.signOut() }}>Sign out</button>
         </div>
     )
 }

@@ -1,16 +1,14 @@
 import React from "react";
 import './App.css';
-import firebase from 'firebase'
 import { Switch, Route } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home'
+import AuthWrapper from '../Wrappers/authWrapper'
+
 const dotenv = require('dotenv');
 dotenv.config();
 
-firebase.initializeApp({
-  apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
-  authDomain: 'ait-krea.firebaseapp.com'
-})
+const authWrapper = new AuthWrapper();
 
 const App = () => {
   return (
@@ -18,11 +16,11 @@ const App = () => {
       <Switch>
         <Route
           exact path='/login'
-          render={(props) => <Login {...props} firebase={firebase} />}
+          render={(props) => <Login {...props} authWrapper={authWrapper} />}
         />
         <Route
           exact path='/'
-          render={(props) => <Home {...props} firebase={firebase} />}
+          render={(props) => <Home {...props} authWrapper={authWrapper} />}
         />
       </Switch>
     </div>

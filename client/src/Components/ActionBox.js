@@ -26,7 +26,7 @@ class ActionBox extends Component {
     }
 
     componentDidMount() {
-        this.props.firebase.auth().onAuthStateChanged(this.handleAuthStateChange);
+        this.props.authWrapper.onAuthStateChanged(this.handleAuthStateChange);
     }
 
     handleAuthStateChange(user) {
