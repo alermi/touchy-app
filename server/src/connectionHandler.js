@@ -41,11 +41,12 @@ class ConnectionHandler {
                             const authorizedToReceive = (decodedToken.artist || decodedToken.admin);
                             if(authorizedToReceive){
                                 next();
+                                return;
                             }
                             else{
                                 next(new Error("User not authorized as a receiver."))
+                                return;
                             }
-                            break;
                         case 'sender':
                             const uid = decodedToken.uid;
                             let returnedSocket = this.idToSocketMap.get(uid);
@@ -57,16 +58,17 @@ class ConnectionHandler {
                             socket.uid = uid;
                             this.idToSocketMap.set(uid, socket);
                             next();
-                            break;
+                            return;
                         default:
                             next(new Error("Socket type not provided."));
-                            break;
+                            return;
                     }
                 })
                 //TODO: Test authentication fail case.
                 .catch((error) => {
                     console.log("Authentication for socket " + socket.id + " failed. " + error);
                     next(new Error("Authentication failed."));
+                    return;
                 });
         })
 
