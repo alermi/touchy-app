@@ -22,6 +22,7 @@ class ConnectionHandler {
 
         this.sendersMap = new Map();
         this.idToSocketMap = new Map();
+        this.auth = auth;
 
         this.io.on('connection', socket => {
             this.handleNewConnection(socket);
@@ -36,14 +37,18 @@ class ConnectionHandler {
             auth.verifyIdToken(token)
                 .then((decodedToken) => {
                     const socketType = socket.handshake.query['socketType'];
+                    if (decodedToken.admin === true) {
+                        socket.admin = true;
+                    }
                     switch (socketType) {
                         case 'receiver':
                             const authorizedToReceive = (decodedToken.artist || decodedToken.admin);
-                            if(authorizedToReceive){
+                            if (authorizedToReceive) {
                                 next();
                                 return;
                             }
-                            else{
+                            else {
+                                console.log('Socket ' + socket.id + ' tried to connect as a receiver but was unauthorized.');
                                 next(new Error("User not authorized as a receiver."))
                                 return;
                             }
@@ -117,6 +122,9 @@ class ConnectionHandler {
             this.handleNewMessage(socket, data);
         });
 
+        socket.on('upgradeToArtistRequest', data => {
+            this.handleUpgradeToArtistRequest(socket, data);
+        });
 
         socket.on('disconnect', (reason) => {
             //TODO: Remove this log
@@ -146,6 +154,26 @@ class ConnectionHandler {
         this.sendersMap.set(socket.id, newConnectionData);
     }
 
+    async handleUpgradeToArtistRequest(socket, data) {
+        console.log('Requested to upgrade ' + data + ' to artist.');
+        if (socket.admin !== true) {
+            console.log('Non-admin user tried to upgrade a user to artist. Ignored');
+            return;
+        }
+        try {
+            const user = await this.auth.getUserByEmail(data);
+            const currentClaims = user.customClaims;
+            currentClaims['admin'] = true;
+            await this.auth.setCustomUserClaims(user.uid, currentClaims);
+            console.log('Upgraded ' + data + ' to artist successfully');
+            socket.emit('upgradeResponse', 'Upgraded ' + data + ' to artist successfully');
+        }
+        catch (err) {
+            console.log(err.message);
+            socket.emit('upgradeResponse', err.message);
+            return;
+        }
+    }
     handleDisconnect(socket, reason) {
         //TODO: Check handshake query type and remove from that structure instead of calling
         // unknown type clean. Delete unknown type clean.
@@ -153,7 +181,7 @@ class ConnectionHandler {
         if (!this.checkIfShouldSend() && this.interval != false) {
             this.stopSending();
         }
-        if(socket.handshake.query['socketType'] === 'sender'){
+        if (socket.handshake.query['socketType'] === 'sender') {
             this.cleanUidMapping(socket);
         }
 

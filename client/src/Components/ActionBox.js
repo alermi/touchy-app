@@ -3,12 +3,14 @@ import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import { io } from "socket.io-client";
+import AdminView from './AdminView';
 
 class ActionBox extends Component {
     constructor(props) {
         super(props);
         this.interval = false;
         this.state = {
+            isAdmin: false,
             activeXProportion: 0,
             activeYProportion: 0,
             isActive: false,
@@ -31,6 +33,15 @@ class ActionBox extends Component {
         if (user) {
             console.log('Signed in at actionBox');
             this.handleUserSignIn(user);
+            user.getIdTokenResult(true)
+                .then((idTokenResult) => {
+                    if (idTokenResult.claims.admin) {
+                        this.setState({ isAdmin: true });
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         } else {
             console.log('Signed out at actionBox');
             this.cleanUpSocket();
@@ -84,6 +95,14 @@ class ActionBox extends Component {
             this.props.history.push('/login');
         });
 
+        this.socket.on('upgradeResponse', (data) => {
+            console.log(data);
+        })
+
+        this.socket.on('error', (err) => {
+            console.log(err);
+        });
+
         this.socket.on('connect_error', (err) => {
             console.log(err);
         });
@@ -131,19 +150,25 @@ class ActionBox extends Component {
 
     render() {
         return (
-            <div className="Action-box">
-                <ReactCursorPosition
-                    style={{ width: '100%' }}
-                    activationInteractionTouch='touch'
-                    onPositionChanged={this.onPositionChanged}
-                    onActivationChanged={this.onActivationChanged}>
-                    <Cursor className="cursor" />
-                isActive: {this.state.isActive ? 'true ' : 'false '}  <br />
-                isPositionOutside: {this.state.isPositionOutside ? 'true' : 'false'} <br />
-                x: {this.state.activeXProportion}  <br />
-                y: {this.state.activeYProportion} <br />
-                </ReactCursorPosition>
-            </div>
+            <>
+                {
+                    this.state.isAdmin ? <AdminView socket={this.socket} /> : <></>
+                }
+                <div className="Action-box">
+                    <ReactCursorPosition
+                        style={{ width: '100%' }}
+                        activationInteractionTouch='touch'
+                        onPositionChanged={this.onPositionChanged}
+                        onActivationChanged={this.onActivationChanged}>
+
+                        <Cursor className="cursor" />
+                        isActive: {this.state.isActive ? 'true ' : 'false '}  <br />
+                        isPositionOutside: {this.state.isPositionOutside ? 'true' : 'false'} <br />
+                        x: {this.state.activeXProportion}  <br />
+                        y: {this.state.activeYProportion} <br />
+                    </ReactCursorPosition>
+                </div>
+            </>
         )
     }
 }

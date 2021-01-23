@@ -15,6 +15,10 @@ class Authenticator {
     setCustomUserClaims(uid, claims) {
         return admin.auth().setCustomUserClaims(uid, claims);
     }
+
+    getUserByEmail(email){
+        return admin.auth().getUserByEmail(email);
+    }
 }
 
 module.exports = Authenticator;
