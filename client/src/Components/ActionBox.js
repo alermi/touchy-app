@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
-import { io } from "socket.io-client";
 import AdminView from './AdminView';
+import SocketWrapper from '../Wrappers/socketWrapper'
+
+const socket = new SocketWrapper();
 
 class ActionBox extends Component {
     constructor(props) {
@@ -31,7 +33,7 @@ class ActionBox extends Component {
 
     handleAuthStateChange(user) {
         if (user) {
-            console.log('Signed in at actionBox');
+            console.log('Signed in at actionBox uid: ' + user.uid);
             this.handleUserSignIn(user);
             user.getIdTokenResult(true)
                 .then((idTokenResult) => {
@@ -44,15 +46,12 @@ class ActionBox extends Component {
                 });
         } else {
             console.log('Signed out at actionBox');
-            this.cleanUpSocket();
+            this.cleanUpInterval();
+            socket.disconnect();
             this.props.history.push('/login');
         }
     }
-    cleanUpSocket() {
-        if (this.socket && this.socket.connected) {
-            this.socket.disconnect();
-            console.log('Socket disconnected');
-        }
+    cleanUpInterval() {
         if (this.interval !== false) {
             clearInterval(this.interval);
             this.interval = false;
@@ -61,64 +60,24 @@ class ActionBox extends Component {
     }
 
     handleUserSignIn(user) {
-        this.cleanUpSocket();
         user.getIdToken(/* forceRefresh */ false).then((token) => {
-            this.initializeSocket(token);
+            socket.initialize(token, this.props.history);
+            socket.addEventListener('disconnect', this.cleanUpInterval);
+            socket.addEventListener('connect', () => {
+                if (this.interval === false) {
+                    this.interval = setInterval(() => {
+                        this.sendData();
+                    }, 1000 / 5);
+                }
+                console.log("Started to send messages.");
+            });
         });
-    }
-
-    initializeSocket(token) {
-        //TODO: Delete log
-        console.log("Server url: " + process.env.REACT_APP_SERVER_URL);
-        this.socket = io(process.env.REACT_APP_SERVER_URL, {
-            query: {
-                socketType: 'sender'
-            },
-            auth: {
-                token: token
-            }
-        });
-        this.socket.on('connect', () => {
-            this.interval = setInterval(() => {
-                this.sendData();
-            }, 1000 / 5);
-            console.log("Connected to server socket.io. Started to send messages");
-        });
-
-        this.socket.on('disconnect', () => {
-            console.log("Disconnected from server socket.io");
-            this.cleanUpSocket();
-        });
-
-        this.socket.on('newLogIn', () => {
-            console.log('Logged in with another socket.');
-            this.props.history.push('/login');
-        });
-
-        this.socket.on('upgradeResponse', (data) => {
-            console.log(data);
-        })
-
-        this.socket.on('error', (err) => {
-            console.log(err);
-        });
-
-        this.socket.on('connect_error', (err) => {
-            console.log(err);
-        });
-
-        console.log('Initilized socket');
     }
 
     sendData() {
-        if (!this.socket) {
-            return;
-        }
         if (!this.state.isPositionOutside && this.state.isActive) {
             let data = [this.state.activeXProportion, this.state.activeYProportion];
-            if (this.socket.connected) {
-                this.socket.send(data);
-            }
+            socket.send(data);
         }
     }
 
@@ -152,7 +111,7 @@ class ActionBox extends Component {
         return (
             <>
                 {
-                    this.state.isAdmin ? <AdminView socket={this.socket} /> : <></>
+                    this.state.isAdmin ? <AdminView socket={socket} /> : <></>
                 }
                 <div className="Action-box">
                     <ReactCursorPosition

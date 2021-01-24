@@ -4,10 +4,9 @@ export default function AdminView(props) {
     const [email, setEmail] = useState('');
 
     const handleSubmit = (event) => {
-        props.socket.emit('upgradeToArtistRequest', email);
+        props.socket.sendUpgradeToArtistRequest(email);
         event.preventDefault();
         setEmail('');
-
     }
 
     const handleChange = (event) => {
