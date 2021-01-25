@@ -3,7 +3,7 @@ import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import AdminView from './AdminView';
-import SocketWrapper from '../Wrappers/socketWrapper'
+import SocketWrapper from '../Wrappers/SocketWrapper'
 
 const socket = new SocketWrapper();
 

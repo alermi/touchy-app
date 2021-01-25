@@ -3,7 +3,7 @@ import './App.css';
 import { Switch, Route } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home'
-import AuthWrapper from '../Wrappers/authWrapper'
+import AuthWrapper from '../Wrappers/AuthWrapper'
 
 const dotenv = require('dotenv');
 dotenv.config();
