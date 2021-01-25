@@ -1,14 +1,14 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 
-
+firebase.initializeApp({
+    apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
+    authDomain: 'ait-krea.firebaseapp.com'
+})
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 
 class AuthWrapper {
     constructor() {
-        firebase.initializeApp({
-            apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
-            authDomain: 'ait-krea.firebaseapp.com'
-        })
         this.GoogleAuthProvider = {
             PROVIDER_ID: firebase.auth.GoogleAuthProvider.PROVIDER_ID
         };
