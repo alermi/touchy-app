@@ -28,7 +28,7 @@ class ActionBox extends Component {
         this.onActivationChanged = this.onActivationChanged.bind(this);
         this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
     }
-    
+
     sendData() {
         if (!this.state.isPositionOutside && this.state.isActive && socket && socket.isConnected()) {
             let data = [this.state.activeXProportion, this.state.activeYProportion];
@@ -43,7 +43,7 @@ class ActionBox extends Component {
     }
 
     componentWillUnmount() {
-        if(this.unsubscribe != null){
+        if (this.unsubscribe != null) {
             this.unsubscribe();
             this.unsubscribe = null;
         }
@@ -58,7 +58,9 @@ class ActionBox extends Component {
             if (this.state.user == null || this.state.user.uid === user.uid) {
                 // Re-login for the same user
                 console.log('Signed in at actionBox uid: ' + user.uid);
-                this.handleUserSignIn(user);
+                user.getIdToken(/* forceRefresh */ false).then((token) => {
+                    socket.initialize(token, this.props.history);
+                });
                 user.getIdTokenResult(true)
                     .then((idTokenResult) => {
                         if (idTokenResult.claims.admin) {
@@ -68,7 +70,7 @@ class ActionBox extends Component {
                     .catch((error) => {
                         console.log(error);
                     });
-                    this.setState({ user: user });
+                this.setState({ user: user });
             }
             else {
                 // Another account logged in
@@ -84,16 +86,6 @@ class ActionBox extends Component {
             this.props.history.push('/login');
         }
     }
-
-
-    handleUserSignIn(user) {
-        user.getIdToken(/* forceRefresh */ false).then((token) => {
-            socket.initialize(token, this.props.history);
-            socket.addEventListener('disconnect', this.cleanUpInterval);
-        });
-    }
-
-
 
     onPositionChanged(e) {
         if (e.elementDimensions != null) {
