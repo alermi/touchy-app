@@ -44,6 +44,7 @@ class ConnectionHandler {
                         case 'receiver':
                             const authorizedToReceive = (decodedToken.artist || decodedToken.admin);
                             if (authorizedToReceive) {
+                                socket.uid = decodedToken.uid;
                                 next();
                                 return;
                             }
