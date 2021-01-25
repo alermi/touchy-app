@@ -4,8 +4,7 @@ import { Switch, Route } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home'
 import { createBrowserHistory } from 'history'
-// import authWrapper from '../Wrappers/AuthWrapper'
-import { AuthContextProvider } from '../Contexts/AuthContext'
+import AuthContextProvider from '../Contexts/AuthContext'
 const dotenv = require('dotenv');
 dotenv.config();
 

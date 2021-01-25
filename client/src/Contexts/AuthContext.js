@@ -1,19 +1,23 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, Component } from 'react'
 import authWrapper from '../Wrappers/AuthWrapper'
 import { withRouter } from 'react-router'
 export const AuthContext = createContext();
 
-export const AuthContextProvider = withRouter((props) => {
-    const [currentUser, setCurrentUser] = useState(null);
-    
-    const [isAdmin, setIsAdmin] = useState(false);
+class AuthContextProvider extends Component {
+    constructor() {
+        super();
+        this.authSubscribe = null;
+        this.state = {
+            currentUser: null,
+            isAdmin: false
+        }
+    }
 
-    const { children } = props;
-    useEffect(() => {
-        console.log('AuthContext useEffect ran');
+    componentDidMount() {
         const handleAuthStateChange = (user) => {
             console.log('HandleAuthStateChange ran');
-            setCurrentUser((previousUser) => {
+            this.setState((prevState, props) => {
+                const previousUser = prevState.currentUser;
                 if (user) {
                     if (previousUser == null || previousUser.uid === user.uid) {
                         // Re-login for the same user
@@ -24,49 +28,57 @@ export const AuthContextProvider = withRouter((props) => {
                         // user.getIdToken(/* forceRefresh */ false).then((token) => {
                         //     socket.initialize(token, this.props.history);
                         // });
+                        
                         user.getIdTokenResult(true)
                             .then((idTokenResult) => {
                                 if (idTokenResult.claims.admin) {
-                                    setIsAdmin(true);
+                                    this.setState({ isAdmin: true })
                                 }
                             })
                             .catch((error) => {
                                 console.log(error);
                             });
-                        return (user);
+                        return { currentUser: user };
                     }
                     else {
                         // Another account logged in
                         console.log('Another account logged in.');
                         // socket.disconnect();
                         props.history.push('/login');
-                        return (null)
+                        return { currentUser: null };
                     }
                 } else {
                     console.log('Signed out');
                     // socket.disconnect();
-                    if(previousUser != null){
-                        props.history.push('/login');
-                        return(null)
-                    }
+                    props.history.push('/login');
+                    return { currentUser: null };
                 }
-                return previousUser;
             })
 
         }
-        return authWrapper.onAuthStateChanged(handleAuthStateChange);
-    }, [])
+        this.authSubscribe = authWrapper.onAuthStateChanged(handleAuthStateChange);
 
-    return (
-        <AuthContext.Provider value={{
-            currentUser: currentUser,
-            isAdmin: isAdmin,
-            auth: authWrapper
-        }}>
-            {children}
-        </AuthContext.Provider>
-    )
+    }
 
-})
+    componentWillUnmount() {
+        this.authSubscribe();
+        this.authSubscribe = null;
+    }
 
-// export default withRouter(AuthContextProvider);
+
+    render() {
+        const { children } = this.props;
+        return (
+            <AuthContext.Provider value={{
+                currentUser: this.state.currentUser,
+                isAdmin: this.state.isAdmin,
+                auth: authWrapper
+            }}>
+                {children}
+            </AuthContext.Provider>
+        )
+    }
+
+}
+
+export default withRouter(AuthContextProvider);
