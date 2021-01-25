@@ -10,10 +10,10 @@ const socket = new SocketWrapper();
 class ActionBox extends Component {
     constructor(props) {
         super(props);
-        this.interval = false;
+        this.interval = null;
+        this.unsubscribe = null;
         this.state = {
             user: null,
-            authUnsubscribe: null,
             isAdmin: false,
             activeXProportion: 0,
             activeYProportion: 0,
@@ -28,16 +28,29 @@ class ActionBox extends Component {
         this.onActivationChanged = this.onActivationChanged.bind(this);
         this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
     }
-
+    
+    sendData() {
+        if (!this.state.isPositionOutside && this.state.isActive && socket && socket.isConnected()) {
+            let data = [this.state.activeXProportion, this.state.activeYProportion];
+            socket.send(data);
+        }
+    }
     componentDidMount() {
-        let unsubscribe = this.props.authWrapper.onAuthStateChanged(this.handleAuthStateChange);
-        this.setState({unsubscribe: unsubscribe});
+        this.unsubscribe = this.props.authWrapper.onAuthStateChanged(this.handleAuthStateChange);
+        this.interval = setInterval(() => {
+            this.sendData();
+        }, 1000 / 5);
     }
 
     componentWillUnmount() {
-        if(this.state.unsubscribe != null){
-            this.state.unsubscribe();
-            this.setState({unsubscribe: null});
+        if(this.unsubscribe != null){
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
+        if (this.interval != null) {
+            clearInterval(this.interval);
+            this.interval = null;
+            console.log('Cleaned up interval');
         }
     }
     handleAuthStateChange(user) {
@@ -60,48 +73,27 @@ class ActionBox extends Component {
             else {
                 // Another account logged in
                 console.log('Another account logged in.');
-                this.cleanUpInterval();
                 socket.disconnect();
                 this.setState({ user: null });
                 this.props.history.push('/login');
             }
         } else {
             console.log('Signed out at actionBox');
-            this.cleanUpInterval();
             socket.disconnect();
             this.setState({ user: null });
             this.props.history.push('/login');
         }
     }
-    cleanUpInterval() {
-        if (this.interval !== false) {
-            clearInterval(this.interval);
-            this.interval = false;
-            console.log('Cleaned up interval');
-        }
-    }
+
 
     handleUserSignIn(user) {
         user.getIdToken(/* forceRefresh */ false).then((token) => {
             socket.initialize(token, this.props.history);
             socket.addEventListener('disconnect', this.cleanUpInterval);
-            socket.addEventListener('connect', () => {
-                if (this.interval === false) {
-                    this.interval = setInterval(() => {
-                        this.sendData();
-                    }, 1000 / 5);
-                }
-                console.log("Started to send messages.");
-            });
         });
     }
 
-    sendData() {
-        if (!this.state.isPositionOutside && this.state.isActive) {
-            let data = [this.state.activeXProportion, this.state.activeYProportion];
-            socket.send(data);
-        }
-    }
+
 
     onPositionChanged(e) {
         if (e.elementDimensions != null) {

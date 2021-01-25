@@ -64,6 +64,10 @@ class SocketWrapper {
     sendUpgradeToArtistRequest(email) {
         this.socket.emit('upgradeToArtistRequest', email);
     }
+
+    isConnected(){
+        return this.socket.connected;
+    }
 }
 
 export default SocketWrapper;
