@@ -34,4 +34,6 @@ class AuthWrapper {
     }
 }
 
-export default AuthWrapper;
+const authWrapper = new AuthWrapper();
+
+export default authWrapper;
