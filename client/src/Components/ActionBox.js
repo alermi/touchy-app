@@ -11,7 +11,7 @@ class ActionBox extends Component {
     constructor(props) {
         super(props);
         this.interval = null;
-        this.unsubscribe = null;
+        this.authUnsubscribe = null;
         this.state = {
             user: null,
             isAdmin: false,
@@ -26,7 +26,6 @@ class ActionBox extends Component {
         }
         this.onPositionChanged = this.onPositionChanged.bind(this);
         this.onActivationChanged = this.onActivationChanged.bind(this);
-        this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
     }
 
     sendData() {
@@ -36,54 +35,16 @@ class ActionBox extends Component {
         }
     }
     componentDidMount() {
-        this.unsubscribe = this.props.authWrapper.onAuthStateChanged(this.handleAuthStateChange);
         this.interval = setInterval(() => {
             this.sendData();
         }, 1000 / 5);
     }
 
     componentWillUnmount() {
-        if (this.unsubscribe != null) {
-            this.unsubscribe();
-            this.unsubscribe = null;
-        }
         if (this.interval != null) {
             clearInterval(this.interval);
             this.interval = null;
             console.log('Cleaned up interval');
-        }
-    }
-    handleAuthStateChange(user) {
-        if (user) {
-            if (this.state.user == null || this.state.user.uid === user.uid) {
-                // Re-login for the same user
-                console.log('Signed in at actionBox uid: ' + user.uid);
-                user.getIdToken(/* forceRefresh */ false).then((token) => {
-                    socket.initialize(token, this.props.history);
-                });
-                user.getIdTokenResult(true)
-                    .then((idTokenResult) => {
-                        if (idTokenResult.claims.admin) {
-                            this.setState({ isAdmin: true });
-                        }
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-                this.setState({ user: user });
-            }
-            else {
-                // Another account logged in
-                console.log('Another account logged in.');
-                socket.disconnect();
-                this.setState({ user: null });
-                this.props.history.push('/login');
-            }
-        } else {
-            console.log('Signed out at actionBox');
-            socket.disconnect();
-            this.setState({ user: null });
-            this.props.history.push('/login');
         }
     }
 
