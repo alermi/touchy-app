@@ -37,7 +37,7 @@ const ActionBox = (props) => {
                 socket.disconnect();
             }
         }
-    }, [currentUser])
+    }, [currentUser, props.history])
 
     const sendData = () => {
         if (!isPositionOutside && isActive && socket && socket.isConnected()) {
