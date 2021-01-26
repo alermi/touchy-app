@@ -26,7 +26,6 @@ const ActionBox = (props) => {
     // Effect to initialize and disconnect socket based on current user.
     useEffect(() => {
         if (!!currentUser) {
-            console.log('Initializing socket');
             currentUser.getIdToken(/* forceRefresh */ false).then((token) => {
                 socket.initialize(token, props.history);
             });
@@ -43,7 +42,6 @@ const ActionBox = (props) => {
         if (!isPositionOutside && isActive && socket && socket.isConnected()) {
             let data = [activeProportions.x, activeProportions.y];
             socket.send(data);
-            console.log(data);
         }
     }
     // useEffect that sets up an interval that uses send data reference 
