@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { withRouter } from 'react-router';
 import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
@@ -6,33 +6,25 @@ import Cursor from './Cursor';
 import AdminView from './AdminView';
 import SocketWrapper from '../Wrappers/SocketWrapper'
 import { AuthContext } from '../Contexts/AuthContext'
+
 const socket = new SocketWrapper();
 
 const ActionBox = (props) => {
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, isAdmin } = useContext(AuthContext);
 
-    const [state, setState] = useState({
-        user: null,
-        isAdmin: false,
-        activeXProportion: 0,
-        activeYProportion: 0,
-        isActive: false,
-        isPositionOutside: true,
-    });
+    const [isActive, setIsActive] = useState(false);
+    const [isPositionOutside, setIsPositionOutside] = useState(true);
     const [elementDimensions, setElementDimensions] = useState({
         width: -1,
         height: -1
     });
+    const [activeProportions, setActiveProportions] = useState({
+        x: 0,
+        y: 0
+    });
 
-    const sendData = () => {
-        if (!state.isPositionOutside && state.isActive && socket && socket.isConnected()) {
-            let data = [state.activeXProportion, state.activeYProportion];
-            socket.send(data);
-        }
-    }
-
+    // Effect to initialize and disconnect socket based on current user.
     useEffect(() => {
-        console.log(currentUser);
         if (!!currentUser) {
             console.log('Initializing socket');
             currentUser.getIdToken(/* forceRefresh */ false).then((token) => {
@@ -45,56 +37,74 @@ const ActionBox = (props) => {
                 socket.disconnect();
             }
         }
-
-        return setInterval(() => {
-            sendData();
-        }, 1000 / 5);
     }, [currentUser])
 
+    const sendData = () => {
+        if (!isPositionOutside && isActive && socket && socket.isConnected()) {
+            let data = [activeProportions.x, activeProportions.y];
+            socket.send(data);
+            console.log(data);
+        }
+    }
+    // useEffect that sets up an interval that uses send data reference 
+    // so that it has the updated coordinates and flags for future calls.
+    const sendDataRef = useRef();
+    useEffect(() => {
+        sendDataRef.current = sendData;
+    })
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            sendDataRef.current();
+        }, 1000 / 5);
+        return () => clearInterval(interval);
+    }, [])
 
     const onPositionChanged = (e) => {
         if (e.elementDimensions != null) {
-            setElementDimensions(e.elementDimensions);
+            setElementDimensions({
+                width: e.elementDimensions.width,
+                height: e.elementDimensions.height
+            });
         }
 
-        setState({ isPositionOutside: e.isPositionOutside });
+        setIsPositionOutside(e.isPositionOutside);
         if (!e.isPositionOutside) {
             let x = e.position.x;
             let y = e.position.y;
             // Set if the elementDimensions have been set previously.
-            if (elementDimensions.width !== -1) {
-                setState({ activeXProportion: (x / elementDimensions.width) });
-            }
-            if (elementDimensions.height !== -1) {
-                setState({ activeYProportion: (y / elementDimensions.height) });
+            if (elementDimensions.width !== -1 && elementDimensions.height !== -1) {
+                setActiveProportions({
+                    x: (x / elementDimensions.width),
+                    y: (y / elementDimensions.height)
+                })
             }
         }
     }
 
     const onActivationChanged = (e) => {
-        setState({ isActive: e.isActive });
-        if (e.isActive) {
-            sendData();
-        }
+        setIsActive(e.isActive);
+        sendDataRef.current();
     }
 
     return (
         <>
             {
-                state.isAdmin ? <AdminView socket={socket} /> : <></>
+                isAdmin ? <AdminView socket={socket} /> : <></>
             }
             <div className="Action-box">
                 <ReactCursorPosition
                     style={{ width: '100%' }}
                     activationInteractionTouch='touch'
                     onPositionChanged={onPositionChanged}
-                    onActivationChanged={onActivationChanged}>
+                    onActivationChanged={onActivationChanged}
+                >
 
                     <Cursor className="cursor" />
-                        isActive: {state.isActive ? 'true ' : 'false '}  <br />
-                        isPositionOutside: {state.isPositionOutside ? 'true' : 'false'} <br />
-                        x: {state.activeXProportion}  <br />
-                        y: {state.activeYProportion} <br />
+                        isActive: {isActive ? 'true ' : 'false '}  <br />
+                        isPositionOutside: {isPositionOutside ? 'true' : 'false'} <br />
+                        x: {activeProportions.x}  <br />
+                        y: {activeProportions.y} <br />
                 </ReactCursorPosition>
             </div>
         </>
