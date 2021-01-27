@@ -10,7 +10,7 @@ import { AuthContext } from '../Contexts/AuthContext'
 const socket = new SocketWrapper();
 
 const ActionBox = (props) => {
-    const { currentUser, isAdmin } = useContext(AuthContext);
+    const { isAdmin, token } = useContext(AuthContext);
 
     const [isActive, setIsActive] = useState(false);
     const [isPositionOutside, setIsPositionOutside] = useState(true);
@@ -25,18 +25,23 @@ const ActionBox = (props) => {
 
     // Effect to initialize and disconnect socket based on current user.
     useEffect(() => {
-        if (!!currentUser) {
-            currentUser.getIdToken(/* forceRefresh */ false).then((token) => {
+        console.log('ActionBox: Effect responsible of initializing socket called');
+        if (token != null) {
+            if (socket.isConnected()) {
+                console.log('Socket was already connected. Updating token');
+                socket.updateToken(token);
+            }
+            else {
                 socket.initialize(token, props.history);
-            });
+            }
         }
         else {
-            if (!!socket) {
+            if (!!socket && socket.isConnected()) {
                 console.log('Disconnecting socket');
                 socket.disconnect();
             }
         }
-    }, [currentUser, props.history])
+    }, [props.history, token])
 
     const sendData = () => {
         if (!isPositionOutside && isActive && socket && socket.isConnected()) {
