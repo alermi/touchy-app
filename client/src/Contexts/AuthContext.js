@@ -9,51 +9,70 @@ class AuthContextProvider extends Component {
         this.authSubscribe = null;
         this.state = {
             currentUser: null,
-            isAdmin: false
+            isAdmin: false,
+            token: null
         }
     }
 
     componentDidMount() {
-        const handleIdTokenChange = (user) => {
-            console.log('HandleIdTokenChange ran');
-            this.setState((prevState, props) => {
-                const previousUser = prevState.currentUser;
-                if (user) {
-                    if (previousUser == null || previousUser.uid === user.uid) {
-                        // Re-login for the same user
-                        console.log('Signed in with uid: ' + user.uid);
-                        if (previousUser != null) {
-                            console.log('Same user signed in again');
-                        }
-                        // user.getIdToken(/* forceRefresh */ false).then((token) => {
-                        //     socket.initialize(token, this.props.history);
-                        // });
-                        
-                        user.getIdTokenResult(true)
-                            .then((idTokenResult) => {
-                                if (idTokenResult.claims.admin) {
-                                    this.setState({ isAdmin: true })
-                                }
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            });
-                        return { currentUser: user };
+        const handleIdTokenChange = async (user) => {
+            console.log('HandleIdTokenChange running');
+            if (user) {
+                let idTokenResult;
+                try {
+                    idTokenResult = await user.getIdTokenResult(false);
+                }
+                catch (err) {
+                    console.log('ERROR: GetIdTokenResult failed at AuthContext. Error: ' + err.message);
+                    return;
+                }
+
+                const previousUser = this.state.currentUser;
+                const previousToken = this.state.token;
+                if (previousUser == null || previousUser.uid === user.uid) {
+                    // Re-login for the same user
+                    if (previousUser != null) {
+                        console.log('Same user signed in again');
                     }
                     else {
-                        // Another account logged in
-                        console.log('Another account logged in.');
-                        // socket.disconnect();
-                        props.history.push('/login');
-                        return { currentUser: null };
+                        console.log('Signed in with uid: ' + user.uid);
                     }
-                } else {
-                    console.log('Signed out');
-                    // socket.disconnect();
-                    props.history.push('/login');
-                    return { currentUser: null };
+
+                    if (previousToken !== idTokenResult.token) {
+                        if (previousToken != null) {
+                            console.log('AuthContext updating token');
+                        }
+                        else {
+                            console.log('AuthContext setting token for the first time');
+                        }
+                    }
+                    this.setState({
+                        token: idTokenResult.token,
+                        currentUser: user,
+                        isAdmin: !!idTokenResult.claims.admin
+                    });
+                    this.props.history.push('/');
                 }
-            })
+                else {
+                    // Another account logged in
+                    console.log('Another account logged in on the same device.');
+                    this.setState({
+                        currentUser: null,
+                        isAdmin: false,
+                        token: null
+                    });
+                    this.props.history.push('/login');
+                }
+            }
+            else {
+                console.log('Signed out');
+                this.setState({
+                    currentUser: null,
+                    isAdmin: false,
+                    token: null
+                });
+                this.props.history.push('/login');
+            }
 
         }
         this.authSubscribe = authWrapper.onIdTokenChanged(handleIdTokenChange);
@@ -72,7 +91,8 @@ class AuthContextProvider extends Component {
             <AuthContext.Provider value={{
                 currentUser: this.state.currentUser,
                 isAdmin: this.state.isAdmin,
-                auth: authWrapper
+                auth: authWrapper,
+                token: this.state.token
             }}>
                 {children}
             </AuthContext.Provider>
