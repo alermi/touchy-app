@@ -23,6 +23,8 @@ class SocketWrapper {
 
         this.socket.on('disconnect', () => {
             console.log("Disconnected from server socket.io");
+            // TODO: Update the token inside the socket so that if it 
+            // tries to re-connect, it has an up to date token.
         });
 
         this.socket.on('newLogIn', () => {
