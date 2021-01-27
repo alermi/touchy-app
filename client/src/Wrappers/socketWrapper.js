@@ -50,6 +50,9 @@ class SocketWrapper {
             this.socket.disconnect();
             console.log('Socket disconnected');
         }
+        else {
+            console.log('Socket disconnect was called but socket was not connected.');
+        }
         this.socket = false;
     }
 
@@ -67,8 +70,14 @@ class SocketWrapper {
         this.socket.emit('upgradeToArtistRequest', email);
     }
 
-    isConnected(){
+    isConnected() {
         return this.socket.connected;
+    }
+
+    updateToken(token) {
+        this.socket.io.opts.auth = {
+            token: token
+        }
     }
 }
 
