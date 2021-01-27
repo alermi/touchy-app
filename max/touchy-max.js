@@ -11,32 +11,42 @@ firebase.initializeApp({
     authDomain: 'ait-krea.firebaseapp.com'
 })
 
-firebase.auth().onAuthStateChanged(handleAuthStateChange);
+firebase.auth().onIdTokenChanged(handleIdTokenChange);
 
 var isSignedIn = false;
 var socket = null;
-
-function handleAuthStateChange(user) {
+var currentToken = '';
+var currentUser = null;
+function handleIdTokenChange(user) {
+    currentUser = user;
     if (user) {
         console.log('Signed in');
         isSignedIn = true;
-        if(socket != null){
-            console.log('WARNING: Socket was not null at login.');
+        if (socket != null) {
+            console.log('Socket was not null at token change.');
+            socket.disconnect();
+            socket = null;
         }
-        user.getIdToken(/* forceRefresh */ false).then((token) => {
+        user.getIdToken(/* forceRefresh */ true).then((token) => {
             socket = initializeSocket(token);
+            if (currentToken !== '' && currentToken !== token) {
+                console.log('Token changed');
+            }
+            currentToken = token;
+        }).catch(err => {
+            console.log('GetIdToken then failed. Error: ' + err.message);
         });
     } else {
         console.log('Signed out');
         isSignedIn = false;
-        if(socket != null && socket.connected){
+        if (socket != null && socket.connected) {
             socket.disconnect();
         }
         socket = null;
     }
 }
 maxApi.addHandler('login', () => {
-    if(isSignedIn){
+    if (isSignedIn) {
         console.log('Already logged in.');
         return;
     }
@@ -51,7 +61,7 @@ maxApi.addHandler('logout', () => {
     firebase.auth().signOut();
 });
 
-function initializeSocket(token){
+function initializeSocket(token) {
     const socket = io(process.env.BACKEND_URL, {
         query: {
             socketType: 'receiver'
@@ -60,17 +70,37 @@ function initializeSocket(token){
             token: token
         }
     });
-    
+
     socket.on('connect_error', (err) => {
-        console.log(err.message);
+        console.log("connection_error: " + err.message);
     });
-    
+
+    socket.on('error', (err) => {
+        console.log("error: " + err.message);
+    });
+
     socket.on('connect', () => {
         console.log('Socket connected.');
     });
-    
-    socket.on('disconnect', () => {
-        console.log('Socket disconnected.');
+
+    socket.on('reconnect_attempt', () => {
+        console.log('Attempting to reconnect');
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log('Socket disconnected. Reason: ' + reason);
+        //TODO: Possibly update the token value here so that we have a valid
+        //token if we connect again.      
+        if (currentUser == null) {
+            console.log('ERROR: On disconnect, currentUser was null');
+        }
+        currentUser.getIdToken(/* forceRefresh */ true).then((token) => {
+            socket.io.opts.auth = {
+                token: token
+            }
+        }).catch(err => {
+            console.log("Error at getIdToken in disconnect: " + err.message);
+        })
     });
 
     socket.on('message', (data) => {
@@ -109,7 +139,7 @@ function initializeSocket(token){
             if (x > 1.0) x = 1.0;
             if (y < 0.0) y = 0.0;
             if (y > 1.0) y = 1.0;
-    
+
             outputList.push(x + '_' + y + '_' + (isActive ? 1 : 0) + '_' + timeStamp);
         }
         maxApi.outlet(outputList);
