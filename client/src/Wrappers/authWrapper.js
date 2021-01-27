@@ -29,8 +29,8 @@ class AuthWrapper {
         return firebase.auth().signOut();
     }
 
-    onAuthStateChanged(callback) {
-        return firebase.auth().onAuthStateChanged(callback);
+    onIdTokenChanged(callback) {
+        return firebase.auth().onIdTokenChanged(callback);
     }
 }
 

@@ -14,8 +14,8 @@ class AuthContextProvider extends Component {
     }
 
     componentDidMount() {
-        const handleAuthStateChange = (user) => {
-            console.log('HandleAuthStateChange ran');
+        const handleIdTokenChange = (user) => {
+            console.log('HandleIdTokenChange ran');
             this.setState((prevState, props) => {
                 const previousUser = prevState.currentUser;
                 if (user) {
@@ -23,7 +23,7 @@ class AuthContextProvider extends Component {
                         // Re-login for the same user
                         console.log('Signed in with uid: ' + user.uid);
                         if (previousUser != null) {
-                            console.log('Current user.uid: ' + previousUser.uid);
+                            console.log('Same user signed in again');
                         }
                         // user.getIdToken(/* forceRefresh */ false).then((token) => {
                         //     socket.initialize(token, this.props.history);
@@ -56,7 +56,7 @@ class AuthContextProvider extends Component {
             })
 
         }
-        this.authSubscribe = authWrapper.onAuthStateChanged(handleAuthStateChange);
+        this.authSubscribe = authWrapper.onIdTokenChanged(handleIdTokenChange);
 
     }
 
