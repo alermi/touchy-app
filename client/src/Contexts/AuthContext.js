@@ -12,6 +12,8 @@ class AuthContextProvider extends Component {
             isAdmin: false,
             token: null
         }
+
+        this.forceRefreshToken = this.forceRefreshToken.bind(this);
     }
 
     componentDidMount() {
@@ -84,7 +86,26 @@ class AuthContextProvider extends Component {
         this.authSubscribe = null;
     }
 
-
+    forceRefreshToken() {
+        console.log('ForceRefreshToken called')
+        if(this.state.currentUser == null){
+            console.log('CurrentUser was null at forceRefreshToken. Ignored call');
+            return;
+        }
+        return this.state.currentUser.getIdToken(/* forceRefresh */ true).then((token) => {
+            if (this.state.token !== token) {
+                console.log('Token changed in forceRefreshToken');
+                this.setState({
+                    token: token
+                })
+            }
+            else{
+                console.log('Token did not change in forceRefreshToken');
+            }
+        }).catch(err => {
+            console.log('ForceRefreshToken failed. Error: ' + err.message);
+        });
+    }
     render() {
         const { children } = this.props;
         return (
@@ -92,7 +113,8 @@ class AuthContextProvider extends Component {
                 currentUser: this.state.currentUser,
                 isAdmin: this.state.isAdmin,
                 auth: authWrapper,
-                token: this.state.token
+                token: this.state.token,
+                forceRefreshToken: this.forceRefreshToken
             }}>
                 {children}
             </AuthContext.Provider>

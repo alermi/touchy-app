@@ -10,7 +10,7 @@ import { AuthContext } from '../Contexts/AuthContext'
 const socket = new SocketWrapper();
 
 const ActionBox = (props) => {
-    const { isAdmin, token } = useContext(AuthContext);
+    const { isAdmin, token, forceRefreshToken } = useContext(AuthContext);
 
     const [isActive, setIsActive] = useState(false);
     const [isPositionOutside, setIsPositionOutside] = useState(true);
@@ -29,10 +29,11 @@ const ActionBox = (props) => {
         if (token != null) {
             if (socket.isConnected()) {
                 console.log('Socket was already connected. Updating token');
-                socket.updateToken(token);
+                socket.setToken(token);
             }
             else {
-                socket.initialize(token, props.history);
+                console.log('ActionBox calling initialize on socket');
+                socket.initialize(token, props.history, forceRefreshToken);
             }
         }
         else {
@@ -41,7 +42,7 @@ const ActionBox = (props) => {
                 socket.disconnect();
             }
         }
-    }, [props.history, token])
+    }, [props.history, token, forceRefreshToken])
 
     const sendData = () => {
         if (!isPositionOutside && isActive && socket && socket.isConnected()) {
