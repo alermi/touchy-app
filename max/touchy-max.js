@@ -91,16 +91,15 @@ function initializeSocket(token) {
         console.log('Socket disconnected. Reason: ' + reason);
         //TODO: Possibly update the token value here so that we have a valid
         //token if we connect again.      
-        if (currentUser == null) {
-            console.log('ERROR: On disconnect, currentUser was null');
+        if (currentUser != null) {
+            currentUser.getIdToken(/* forceRefresh */ true).then((token) => {
+                socket.io.opts.auth = {
+                    token: token
+                }
+            }).catch(err => {
+                console.log("Error at getIdToken in disconnect: " + err.message);
+            })
         }
-        currentUser.getIdToken(/* forceRefresh */ true).then((token) => {
-            socket.io.opts.auth = {
-                token: token
-            }
-        }).catch(err => {
-            console.log("Error at getIdToken in disconnect: " + err.message);
-        })
     });
 
     socket.on('message', (data) => {
