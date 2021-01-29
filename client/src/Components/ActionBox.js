@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { withRouter } from 'react-router';
 import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
-import { AuthContext } from '../Contexts/AuthContext'
 import { SocketContext } from '../Contexts/SocketContext'
 
 const ActionBox = (props) => {
@@ -89,4 +87,4 @@ const ActionBox = (props) => {
     )
 }
 
-export default withRouter(ActionBox);
+export default ActionBox;
