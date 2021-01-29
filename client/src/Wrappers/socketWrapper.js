@@ -6,7 +6,7 @@ class SocketWrapper {
 
     }
 
-    initialize(token, history, forceRefreshToken) {
+    initialize(token, handleNewLogin, forceRefreshToken) {
         //TODO: Delete log
         console.log("Initializing socket with server url: " + process.env.REACT_APP_SERVER_URL);
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
@@ -30,7 +30,7 @@ class SocketWrapper {
 
         this.socket.on('newLogIn', () => {
             console.log('Logged in with another socket.');
-            history.push('/login');
+            handleNewLogin();
         });
 
         this.socket.on('upgradeResponse', (data) => {

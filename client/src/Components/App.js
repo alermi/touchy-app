@@ -2,9 +2,14 @@ import React from "react";
 import './App.css';
 import { Switch, Route } from 'react-router-dom';
 import Login from './Login';
-import Home from './Home'
-import { createBrowserHistory } from 'history'
-import AuthContextProvider from '../Contexts/AuthContext'
+import Home from './Home';
+import AdminView from './AdminView';
+import { createBrowserHistory } from 'history';
+import AuthContextProvider from '../Contexts/AuthContext';
+import ProtectedRoute from './ProtectedRoute';
+import LoginRoute from './LoginRoute';
+
+import SocketContextProvider from '../Contexts/SocketContext'
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -13,19 +18,24 @@ const App = () => {
 
   return (
     <div className="App" style={{ touchAction: 'none' }}>
-        <AuthContextProvider history={history}>
+      <AuthContextProvider history={history}>
+        <SocketContextProvider>
           <Switch>
-            <Route
+            <LoginRoute
               exact path='/login'
               component={Login}
             />
-            <Route
+            <ProtectedRoute
               exact path='/'
               component={Home}
             />
-            
+            <Route
+              exact path='/admin'
+              component={AdminView}
+            />
           </Switch>
-        </AuthContextProvider>
+        </SocketContextProvider>
+      </AuthContextProvider>
     </div>
   )
 }

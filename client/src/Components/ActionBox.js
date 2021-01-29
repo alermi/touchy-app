@@ -4,13 +4,12 @@ import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
 import AdminView from './AdminView';
-import SocketWrapper from '../Wrappers/SocketWrapper'
 import { AuthContext } from '../Contexts/AuthContext'
-
-const socket = new SocketWrapper();
+import { SocketContext } from '../Contexts/SocketContext'
 
 const ActionBox = (props) => {
-    const { isAdmin, token, forceRefreshToken } = useContext(AuthContext);
+    const { isAdmin } = useContext(AuthContext);
+    const {socket} = useContext(SocketContext);
 
     const [isActive, setIsActive] = useState(false);
     const [isPositionOutside, setIsPositionOutside] = useState(true);
@@ -23,26 +22,6 @@ const ActionBox = (props) => {
         y: 0
     });
 
-    // Effect to initialize and disconnect socket based on current user.
-    useEffect(() => {
-        console.log('ActionBox: Effect responsible of initializing socket called');
-        if (token != null) {
-            if (socket.isConnected()) {
-                console.log('Socket was already connected. Updating token');
-                socket.setToken(token);
-            }
-            else {
-                console.log('ActionBox calling initialize on socket');
-                socket.initialize(token, props.history, forceRefreshToken);
-            }
-        }
-        else {
-            if (!!socket && socket.isConnected()) {
-                console.log('Disconnecting socket');
-                socket.disconnect();
-            }
-        }
-    }, [props.history, token, forceRefreshToken])
 
     const sendData = () => {
         if (!isPositionOutside && isActive && socket && socket.isConnected()) {
