@@ -5,7 +5,7 @@ firebase.initializeApp({
     apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
     authDomain: 'ait-krea.firebaseapp.com'
 })
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
 
 class AuthWrapper {
     constructor() {
