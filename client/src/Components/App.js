@@ -6,8 +6,8 @@ import Home from './Home';
 import AdminView from './AdminView';
 import { createBrowserHistory } from 'history';
 import AuthContextProvider from '../Contexts/AuthContext';
-import ProtectedRoute from './ProtectedRoute';
-import LoginRoute from './LoginRoute';
+import ProtectedRoute from '../Routes/ProtectedRoute';
+import LoginRoute from '../Routes/LoginRoute';
 
 import SocketContextProvider from '../Contexts/SocketContext'
 const dotenv = require('dotenv');

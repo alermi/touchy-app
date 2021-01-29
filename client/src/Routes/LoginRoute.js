@@ -4,7 +4,6 @@ import { AuthContext } from '../Contexts/AuthContext'
 
 const LoginRoute = ({ component: Component, ...rest }) => {
     const { currentUser } = useContext(AuthContext);
-    console.log(currentUser);
     return (
         <Route {...rest} render={props => (
             currentUser == null ?
