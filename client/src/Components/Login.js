@@ -5,7 +5,6 @@ import { AuthContext } from '../Contexts/AuthContext'
 const Login = (props) => {
     const { auth } = useContext(AuthContext);
 
-
     const uiConfig = {
         signInSuccessUrl: '/',
         callbacks: {
@@ -13,7 +12,7 @@ const Login = (props) => {
                 // var user = authResult.user;
                 // var credential = authResult.credential;
                 // console.log('User ' + user + ' signed in successfully with credential: ' + credential);
-                return true;
+                return false;
             },
             // signInFailure: function(error) {
             //     console.log('Failed to sign in.');
