@@ -4,7 +4,6 @@ import { Switch } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home';
 import AdminView from './AdminView';
-import { createBrowserHistory } from 'history';
 import AuthContextProvider from '../Contexts/AuthContext';
 import ProtectedRoute from '../Routes/ProtectedRoute';
 import LoginRoute from '../Routes/LoginRoute';
@@ -14,12 +13,11 @@ import SocketContextProvider from '../Contexts/SocketContext'
 const dotenv = require('dotenv');
 dotenv.config();
 
-const history = createBrowserHistory();
 const App = () => {
 
   return (
     <div className="App" style={{ touchAction: 'none' }}>
-      <AuthContextProvider history={history}>
+      <AuthContextProvider>
         <SocketContextProvider>
           <Switch>
             <LoginRoute
