@@ -34,10 +34,6 @@ class SocketWrapper {
             handleNewLogin();
         });
 
-        this.socket.on('upgradeResponse', (data) => {
-            console.log(data);
-        })
-
         this.socket.on('error', (err) => {
             console.log('Socket error: ' + err.message);
         });
@@ -66,14 +62,24 @@ class SocketWrapper {
         this.socket.on(event, listener);
     }
 
+    removeAllListenersOfEvent(event){
+        this.socket.off(event);
+    }
+
     sendUpgradeToArtistRequest(email) {
         this.socket.emit('upgradeToArtistRequest', email);
     }
 
     setToken(token) {
-        this.socket.io.opts.auth = {
-            token: token
+        if(this.socket){
+            this.socket.io.opts.auth = {
+                token: token
+            }
         }
+        else{
+            console.log('ERROR: setToken in SocketWrapper was called but socket was false');
+        }
+
     }
 }
 
