@@ -5,7 +5,7 @@ import Cursor from './Cursor';
 import { SocketContext } from '../Contexts/SocketContext'
 
 const ActionBox = (props) => {
-    const {socket} = useContext(SocketContext);
+    const {socket, connected} = useContext(SocketContext);
 
     const [isActive, setIsActive] = useState(false);
     const [isPositionOutside, setIsPositionOutside] = useState(true);
@@ -20,7 +20,7 @@ const ActionBox = (props) => {
 
 
     const sendData = () => {
-        if (!isPositionOutside && isActive && socket && socket.isConnected()) {
+        if (!isPositionOutside && isActive && socket && connected) {
             let data = [activeProportions.x, activeProportions.y];
             socket.send(data);
         }

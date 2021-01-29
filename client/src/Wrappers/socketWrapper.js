@@ -3,10 +3,9 @@ import { io } from "socket.io-client";
 class SocketWrapper {
     constructor() {
         this.socket = false;
-
     }
 
-    initialize(token, handleNewLogin, forceRefreshToken) {
+    initialize(token, handleNewLogin, forceRefreshToken, setConnected) {
         //TODO: Delete log
         console.log("Initializing socket with server url: " + process.env.REACT_APP_SERVER_URL);
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
@@ -19,12 +18,14 @@ class SocketWrapper {
         });
         this.socket.on('connect', () => {
             console.log("Connected to server socket.io.");
+            setConnected(true);
         });
 
         this.socket.on('disconnect', () => {
             console.log("Disconnected from server socket.io");
             // TODO: Add the check if the internet is on. If not, add an event listener to 
             // window (online) and call forceRefreshToken then.
+            setConnected(false);
             forceRefreshToken();
         });
 
@@ -47,12 +48,10 @@ class SocketWrapper {
     }
 
     disconnect() {
-        if (this.socket && this.socket.connected) {
+        if (this.socket) {
+            this.socket.removeAllListeners();
             this.socket.disconnect();
             console.log('Socket disconnected');
-        }
-        else {
-            console.log('Socket disconnect was called but socket was not connected.');
         }
         this.socket = false;
     }
@@ -71,10 +70,6 @@ class SocketWrapper {
         this.socket.emit('upgradeToArtistRequest', email);
     }
 
-    isConnected() {
-        return this.socket.connected;
-    }
-
     setToken(token) {
         this.socket.io.opts.auth = {
             token: token
@@ -82,4 +77,5 @@ class SocketWrapper {
     }
 }
 
-export default SocketWrapper;
+const socketWrapper = new SocketWrapper();
+export default socketWrapper;

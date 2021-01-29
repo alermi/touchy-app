@@ -1,38 +1,40 @@
-import React, { createContext, useEffect, useContext } from 'react'
+import React, { createContext, useEffect, useContext, useState } from 'react'
 import { AuthContext } from '../Contexts/AuthContext'
-import SocketWrapper from '../Wrappers/SocketWrapper'
+import socketWrapper from '../Wrappers/SocketWrapper'
 
 export const SocketContext = createContext();
-const socket = new SocketWrapper();
 
 const SocketContextProvider = (props) => {
     const { token, forceRefreshToken, handleNewLogin } = useContext(AuthContext);
     const { children } = props;
+    const [connected, setConnected] = useState(false);
 
     // Effect to initialize and disconnect socket based on current user.
     useEffect(() => {
         console.log('SocketContext: Effect responsible of initializing socket called');
         if (token != null) {
-            if (socket.isConnected()) {
+            if (connected) {
                 console.log('Socket was already connected. Updating token');
-                socket.setToken(token);
+                socketWrapper.setToken(token);
             }
             else {
                 console.log('SocketContext calling initialize on socket');
-                socket.initialize(token, handleNewLogin, forceRefreshToken);
+                socketWrapper.disconnect();
+                socketWrapper.initialize(token, handleNewLogin, forceRefreshToken, setConnected);
             }
         }
         else {
-            if (!!socket && socket.isConnected()) {
+            if (!!socketWrapper && connected) {
                 console.log('Disconnecting socket');
-                socket.disconnect();
+                socketWrapper.disconnect();
             }
         }
-    }, [handleNewLogin, token, forceRefreshToken])
+    }, [handleNewLogin, token, forceRefreshToken, connected])
 
     return (
         <SocketContext.Provider value={{
-            socket: socket
+            socket: socketWrapper,
+            connected: connected
         }}>
             {children}
         </SocketContext.Provider>
