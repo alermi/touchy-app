@@ -13,8 +13,7 @@ const Home = (props) => {
     return (
         <div>
             <header className="App-header">
-                <p>Touch the box to interact</p>
-                <b>Connection Status: {connected ? 'Connected' : 'Disconnected'}</b>
+                <b>Socket Status: {connected ? 'Active' : 'Not Active'}</b>
             </header>
             <div style={{ marginLeft: '10%', marginRight: '10%' }}>
                 <ActionBox authWrapper={auth} />
