@@ -1,6 +1,5 @@
 import React, { createContext, Component } from 'react'
 import authWrapper from '../Wrappers/AuthWrapper'
-import { withRouter } from 'react-router'
 export const AuthContext = createContext();
 
 class AuthContextProvider extends Component {
@@ -13,6 +12,7 @@ class AuthContextProvider extends Component {
             token: null
         }
 
+        this.handleIdTokenChange = this.handleIdTokenChange.bind(this);
         this.forceRefreshToken = this.forceRefreshToken.bind(this);
         this.handleNewLogin = this.handleNewLogin.bind(this);
 
@@ -136,4 +136,4 @@ class AuthContextProvider extends Component {
 
 }
 
-export default withRouter(AuthContextProvider);
+export default AuthContextProvider;

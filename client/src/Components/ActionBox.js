@@ -3,12 +3,10 @@ import { withRouter } from 'react-router';
 import './ActionBox.css'
 import ReactCursorPosition from 'react-cursor-position';
 import Cursor from './Cursor';
-import AdminView from './AdminView';
 import { AuthContext } from '../Contexts/AuthContext'
 import { SocketContext } from '../Contexts/SocketContext'
 
 const ActionBox = (props) => {
-    const { isAdmin } = useContext(AuthContext);
     const {socket} = useContext(SocketContext);
 
     const [isActive, setIsActive] = useState(false);
@@ -72,9 +70,6 @@ const ActionBox = (props) => {
 
     return (
         <>
-            {
-                isAdmin ? <AdminView socket={socket} /> : <></>
-            }
             <div className="Action-box">
                 <ReactCursorPosition
                     style={{ width: '100%' }}

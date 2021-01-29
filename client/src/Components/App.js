@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home';
 import AdminView from './AdminView';
@@ -8,6 +8,7 @@ import { createBrowserHistory } from 'history';
 import AuthContextProvider from '../Contexts/AuthContext';
 import ProtectedRoute from '../Routes/ProtectedRoute';
 import LoginRoute from '../Routes/LoginRoute';
+import AdminRoute from '../Routes/AdminRoute';
 
 import SocketContextProvider from '../Contexts/SocketContext'
 const dotenv = require('dotenv');
@@ -29,7 +30,7 @@ const App = () => {
               exact path='/'
               component={Home}
             />
-            <Route
+            <AdminRoute
               exact path='/admin'
               component={AdminView}
             />

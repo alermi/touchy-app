@@ -1,9 +1,12 @@
 import React, { useContext } from 'react'
 import ActionBox from './ActionBox'
 import { AuthContext } from '../Contexts/AuthContext'
+import { useHistory } from 'react-router-dom';
 
 const Home = (props) => {
-    const { auth } = useContext(AuthContext)
+    const { auth, isAdmin } = useContext(AuthContext)
+    const history = useHistory();
+
     return (
         <div>
             <header className="App-header">
@@ -13,6 +16,11 @@ const Home = (props) => {
                 <ActionBox authWrapper={auth} />
             </div>
             <button onClick={() => { auth.signOut() }}>Sign out</button>
+            {isAdmin ?
+                <button onClick={() => { history.push('/admin') }}>Admin Panel</button>
+                :
+                <></>
+            }
         </div>
     )
 }
