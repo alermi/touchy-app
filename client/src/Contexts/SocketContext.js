@@ -18,15 +18,15 @@ const SocketContextProvider = (props) => {
                 socketWrapper.setToken(token);
             }
             else {
-                console.log('SocketContext calling initialize on socket');
-                socketWrapper.disconnect();
+                console.log('SocketContext calling initialize on socket (after a cleanup)');
+                socketWrapper.cleanUp();
                 socketWrapper.initialize(token, handleNewLogin, forceRefreshToken, setConnected);
             }
         }
         else {
             if (!!socketWrapper && connected) {
                 console.log('Disconnecting socket');
-                socketWrapper.disconnect();
+                socketWrapper.cleanUp();
             }
         }
     }, [handleNewLogin, token, forceRefreshToken, connected])
