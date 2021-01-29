@@ -53,10 +53,6 @@ class AuthContextProvider extends Component {
                     currentUser: user,
                     isAdmin: !!idTokenResult.claims.admin
                 });
-                // if(previousUser == null){
-                //     console.log('AuthContext redirecting to /');
-                //     this.props.history.push('/');
-                // }
             }
             else {
                 // Another account logged in
@@ -66,8 +62,6 @@ class AuthContextProvider extends Component {
                     isAdmin: false,
                     token: null
                 });
-                // console.log('AuthContext refirecting to /login');
-                // this.props.history.push('/login');
             }
         }
         else {
@@ -77,15 +71,12 @@ class AuthContextProvider extends Component {
                 isAdmin: false,
                 token: null
             });
-            // console.log('AuthContext refirecting to /login');
-            // this.props.history.push('/login');
         }
 
     }
     componentDidMount() {
         console.log('AuthContext component mounted');
-        
-        if(this.authSubscribe === null){
+        if (this.authSubscribe === null) {
             console.log('AuthContext subscribing to onIdTokenChanged');
             this.authSubscribe = authWrapper.onIdTokenChanged(this.handleIdTokenChange);
         }
@@ -100,7 +91,7 @@ class AuthContextProvider extends Component {
 
     forceRefreshToken() {
         console.log('ForceRefreshToken called')
-        if(this.state.currentUser == null){
+        if (this.state.currentUser == null) {
             console.log('CurrentUser was null at forceRefreshToken. Ignored call');
             return;
         }
@@ -111,7 +102,7 @@ class AuthContextProvider extends Component {
                     token: token
                 })
             }
-            else{
+            else {
                 console.log('Token did not change in forceRefreshToken');
             }
         }).catch(err => {
@@ -119,7 +110,7 @@ class AuthContextProvider extends Component {
         });
     }
 
-    handleNewLogin(){
+    handleNewLogin() {
         console.log('AuthContext handling new login');
         this.setState({
             currentUser: null,
