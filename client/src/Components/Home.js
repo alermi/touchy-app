@@ -24,6 +24,9 @@ const Home = (props) => {
                 :
                 <></>
             }
+            <div>
+                <button onClick={() => { history.push('/removeData') }}>Delete User Data</button>
+            </div>
         </div>
     )
 }

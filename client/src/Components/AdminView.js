@@ -58,7 +58,6 @@ const AdminView = (props) => {
                 :
                 <></>
             }
-            {/* </div> */}
         </>
     )
 }

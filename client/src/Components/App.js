@@ -3,6 +3,7 @@ import './App.css';
 import { Switch } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home';
+import RemoveDataView from './RemoveDataView';
 import AdminView from './AdminView';
 import AuthContextProvider from '../Contexts/AuthContext';
 import ProtectedRoute from '../Routes/ProtectedRoute';
@@ -31,6 +32,10 @@ const App = () => {
             <AdminRoute
               exact path='/admin'
               component={AdminView}
+            />
+            <ProtectedRoute
+              exact path='/removeData'
+              component={RemoveDataView}
             />
           </Switch>
         </SocketContextProvider>
