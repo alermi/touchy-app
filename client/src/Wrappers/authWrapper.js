@@ -2,8 +2,8 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 
 firebase.initializeApp({
-    apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
-    authDomain: 'ait-krea.firebaseapp.com'
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN
 })
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
 

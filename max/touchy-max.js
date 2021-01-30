@@ -7,8 +7,8 @@ dotenv.config();
 const DATA_PER_USER = 5;
 
 firebase.initializeApp({
-    apiKey: 'AIzaSyCz0liPBXblxmbPOLU3hVH-6-nIs4Kr7QU',
-    authDomain: 'ait-krea.firebaseapp.com'
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN
 })
 
 firebase.auth().onIdTokenChanged(handleIdTokenChange);
@@ -53,7 +53,7 @@ maxApi.addHandler('login', () => {
     //TODO: Check what happens when the receiver also logs in from the same email as sender. Possibly
     // change the regular user signin to password instead of link and require email verification.
     firebase.auth().signInWithEmailAndPassword(process.env.EMAIL, process.env.PASSWORD).catch(error => {
-        console.log(error.message);
+        console.log('Error at sign in: ' + error.message);
     })
 });
 

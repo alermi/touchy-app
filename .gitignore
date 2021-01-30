@@ -39,3 +39,4 @@ yarn-error.log*
 
 #firebase service account key
 server/serviceAccountKey.json
+server/developmentServiceAccountKey.json
