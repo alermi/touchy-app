@@ -1,11 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { SocketContext } from '../Contexts/SocketContext'
+import { useHistory } from 'react-router-dom';
 
 const AdminView = (props) => {
     const { socket, connected } = useContext(SocketContext)
-    const [email, setEmail] = useState('');
+    const [artistEmail, setArtistEmail] = useState('');
+    const [adminEmail, setAdminEmail] = useState('');
     const [showingAlert, setShowingAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const history = useHistory();
 
     useEffect(() => {
         if (showingAlert) {
@@ -15,10 +18,16 @@ const AdminView = (props) => {
         }
     }, [showingAlert])
 
-    const handleSubmit = (event) => {
-        socket.sendUpgradeToArtistRequest(email);
+    const handleArtistRequestSubmit = (event) => {
+        socket.sendUpgradeRequest(artistEmail, 'artist');
         event.preventDefault();
-        setEmail('');
+        setArtistEmail('');
+    }
+
+    const handleAdminRequestSubmit = (event) => {
+        socket.sendUpgradeRequest(adminEmail, 'admin');
+        event.preventDefault();
+        setAdminEmail('');
     }
 
     const handleUpgradeResponse = (data) => {
@@ -36,28 +45,43 @@ const AdminView = (props) => {
         }
     }, [socket, connected])
 
-    const handleChange = (event) => {
-        setEmail(event.target.value);
+    const handleArtistEmailChange = (event) => {
+        setArtistEmail(event.target.value);
+    }
+
+    const handleAdminEmailChange = (event) => {
+        setAdminEmail(event.target.value);
     }
     return (
         <>
             <header className="App-header">
                 <b>Socket Status: {connected ? 'Active' : 'Not Active'}</b>
             </header>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleArtistRequestSubmit}>
                 <h4>Upgrade user to artist</h4>
                 <label>
                     Email:
-                <input type='text' value={email} onChange={handleChange} />
+                <input type='text' value={artistEmail} onChange={handleArtistEmailChange} />
                 </label>
                 <input type='submit' value='Submit' />
             </form>
-            {/* <div className='alert alert-success alert-shown'> */}
-            {showingAlert ?
-                <strong>{alertMessage}</strong>
-                :
-                <></>
-            }
+
+            <form onSubmit={handleAdminRequestSubmit}>
+                <h4>Upgrade user to ADMIN</h4>
+                <label>
+                    Email:
+                <input type='text' value={adminEmail} onChange={handleAdminEmailChange} />
+                </label>
+                <input type='submit' value='Submit' />
+            </form>
+            <div>
+                {showingAlert ?
+                    <strong>{alertMessage}</strong>
+                    :
+                    <></>
+                }
+            </div>
+            <button onClick={() => { history.push('/') }}>Go Back</button>
         </>
     )
 }

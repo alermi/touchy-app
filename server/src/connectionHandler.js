@@ -123,8 +123,8 @@ class ConnectionHandler {
             this.handleNewMessage(socket, data);
         });
 
-        socket.on('upgradeToArtistRequest', data => {
-            this.handleUpgradeToArtistRequest(socket, data);
+        socket.on('upgradeRequest', (email, role) => {
+            this.handleUpgradeRequest(socket, email, role);
         });
 
         socket.on('disconnect', (reason) => {
@@ -155,22 +155,38 @@ class ConnectionHandler {
         this.sendersMap.set(socket.id, newConnectionData);
     }
 
-    async handleUpgradeToArtistRequest(socket, data) {
-        console.log('Requested to upgrade ' + data + ' to artist.');
+    async handleUpgradeRequest(socket, email, role) {
         if (socket.admin !== true) {
-            console.log('Non-admin user tried to upgrade a user to artist. Ignored');
+            console.log('Non-admin user tried to upgrade a user. Ignored');
+            // TODO: We could disconnect the socket here since it's being bad!
             return;
         }
+        console.log('Requested to upgrade ' + email + ' to ' + role);
         try {
-            const user = await this.auth.getUserByEmail(data);
-            const currentClaims = user.customClaims;
-            currentClaims['admin'] = true;
-            await this.auth.setCustomUserClaims(user.uid, currentClaims);
-            console.log('Upgraded ' + data + ' to artist successfully');
-            socket.emit('upgradeResponse', 'Upgraded ' + data + ' to artist successfully');
+            const user = await this.auth.getUserByEmail(email);
+            const currentClaims = !!user.customClaims ? user.customClaims : {};
+            switch (role) {
+                case 'artist':
+                    currentClaims['artist'] = true;
+                    await this.auth.setCustomUserClaims(user.uid, currentClaims);
+                    console.log('Upgraded ' + email + ' to artist successfully');
+                    socket.emit('upgradeResponse', 'Upgraded ' + email + ' to artist successfully');
+                    return;
+                case 'admin':
+                    currentClaims['admin'] = true;
+                    await this.auth.setCustomUserClaims(user.uid, currentClaims);
+                    console.log('Upgraded ' + email + ' to admin successfully');
+                    socket.emit('upgradeResponse', 'Upgraded ' + email + ' to admin successfully');
+                    return;
+                default:
+                    console.log('Error in handleUpgradeRequest: Role specified does not exist.');
+                    socket.emit('upgradeResponse', 'Role specified does not exist.');
+                    return;
+            }
+
         }
         catch (err) {
-            console.log(err.message);
+            console.log('Error in handleUpgradeRequest: ' + err.message);
             socket.emit('upgradeResponse', err.message);
             return;
         }

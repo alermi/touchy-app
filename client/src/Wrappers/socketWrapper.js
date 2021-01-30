@@ -66,8 +66,8 @@ class SocketWrapper {
         this.socket.off(event);
     }
 
-    sendUpgradeToArtistRequest(email) {
-        this.socket.emit('upgradeToArtistRequest', email);
+    sendUpgradeRequest(email, role) {
+        this.socket.emit('upgradeRequest', email, role);
     }
 
     setToken(token) {
