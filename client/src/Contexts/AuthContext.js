@@ -14,11 +14,11 @@ class AuthContextProvider extends Component {
 
         this.handleIdTokenChange = this.handleIdTokenChange.bind(this);
         this.forceRefreshToken = this.forceRefreshToken.bind(this);
+        this.stubbornRefresh = this.stubbornRefresh.bind(this);
         this.handleNewLogin = this.handleNewLogin.bind(this);
 
     }
     handleIdTokenChange = async (user) => {
-        console.log('HandleIdTokenChange running');
         if (user) {
             let idTokenResult;
             try {
@@ -80,7 +80,6 @@ class AuthContextProvider extends Component {
             console.log('AuthContext subscribing to onIdTokenChanged');
             this.authSubscribe = authWrapper.onIdTokenChanged(this.handleIdTokenChange);
         }
-
     }
 
     componentWillUnmount() {
@@ -93,7 +92,7 @@ class AuthContextProvider extends Component {
         console.log('ForceRefreshToken called')
         if (this.state.currentUser == null) {
             console.log('CurrentUser was null at forceRefreshToken. Ignored call');
-            return;
+            return Promise.resolve(null);
         }
         return this.state.currentUser.getIdToken(/* forceRefresh */ true).then((token) => {
             if (this.state.token !== token) {
@@ -105,9 +104,18 @@ class AuthContextProvider extends Component {
             else {
                 console.log('Token did not change in forceRefreshToken');
             }
-        }).catch(err => {
-            console.log('ForceRefreshToken failed. Error: ' + err.message);
+            return Promise.resolve(token);
         });
+    }
+    //TODO: Move this to authContext
+    stubbornRefresh() {
+        console.log("StubbornRefresh called");
+        this.forceRefreshToken().catch(err => {
+            setTimeout(() => {
+                console.log('Error in forcerefresh in stubbornRefresh. Trying again in 5 seconds.')
+                this.stubbornRefresh();
+            }, 5000)
+        })
     }
 
     handleNewLogin() {
@@ -126,7 +134,7 @@ class AuthContextProvider extends Component {
                 isAdmin: this.state.isAdmin,
                 auth: authWrapper,
                 token: this.state.token,
-                forceRefreshToken: this.forceRefreshToken,
+                stubbornRefresh: this.stubbornRefresh,
                 handleNewLogin: this.handleNewLogin
             }}>
                 {children}

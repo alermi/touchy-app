@@ -5,8 +5,12 @@ class SocketWrapper {
         this.socket = false;
     }
 
-    initialize(token, handleNewLogin, forceRefreshToken, setConnected) {
+    initialize(token, handleNewLogin, stubbornRefresh, setConnected) {
         //TODO: Delete log
+        if (!!this.socket) {
+            console.log('At initialize, socket was already initialized. Cleaning up first.');
+            this.cleanUp();
+        }
         console.log("Initializing socket with server url: " + process.env.REACT_APP_SERVER_URL);
         this.socket = io(process.env.REACT_APP_SERVER_URL, {
             query: {
@@ -26,7 +30,6 @@ class SocketWrapper {
             // TODO: Add the check if the internet is on. If not, add an event listener to 
             // window (online) and call forceRefreshToken then.
             setConnected(false);
-            forceRefreshToken();
         });
 
         this.socket.on('newLogIn', () => {
@@ -40,6 +43,10 @@ class SocketWrapper {
 
         this.socket.on('connect_error', (err) => {
             console.log('Socket connection_error: ' + err.message);
+            if (err.message === "Authentication failed.") {
+                this.cleanUp();
+                stubbornRefresh();
+            }
         });
     }
 
@@ -62,7 +69,7 @@ class SocketWrapper {
         this.socket.on(event, listener);
     }
 
-    removeAllListenersOfEvent(event){
+    removeAllListenersOfEvent(event) {
         this.socket.off(event);
     }
 
@@ -70,18 +77,27 @@ class SocketWrapper {
         this.socket.emit('upgradeRequest', email, role);
     }
 
+    getToken(){
+        if (!!this.socket) {
+            return this.socket.io.opts.auth.token;
+        }
+        else {
+            return null;
+        }  
+    }
+
     setToken(token) {
-        if(this.socket){
+        if (!!this.socket) {
             this.socket.io.opts.auth = {
                 token: token
             }
         }
-        else{
+        else {
             console.log('ERROR: setToken in SocketWrapper was called but socket was false');
         }
 
     }
 }
 
-const socketWrapper = new SocketWrapper();
-export default socketWrapper;
+// const socketWrapper = new SocketWrapper();
+export default SocketWrapper;

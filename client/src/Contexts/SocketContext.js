@@ -1,35 +1,35 @@
 import React, { createContext, useEffect, useContext, useState } from 'react'
 import { AuthContext } from '../Contexts/AuthContext'
-import socketWrapper from '../Wrappers/SocketWrapper'
+import SocketWrapper from '../Wrappers/SocketWrapper'
+const socketWrapper = new SocketWrapper();
 
 export const SocketContext = createContext();
 
 const SocketContextProvider = (props) => {
-    const { token, forceRefreshToken, handleNewLogin } = useContext(AuthContext);
+    const { token, stubbornRefresh, handleNewLogin } = useContext(AuthContext);
     const { children } = props;
     const [connected, setConnected] = useState(false);
 
     // Effect to initialize and disconnect socket based on current user.
     useEffect(() => {
-        console.log('SocketContext: Effect responsible of initializing socket called');
+        console.log('SocketContext effect that controls the socketWrapper called');
         if (token != null) {
-            if (connected) {
-                console.log('Socket was already connected. Updating token');
+            if(!!socketWrapper.getToken() && (socketWrapper.getToken() !== token)){
+                console.log('SocketContext updating socketWrapper token');
                 socketWrapper.setToken(token);
             }
-            else {
+            if (!connected) {
                 console.log('SocketContext calling initialize on socket (after a cleanup)');
-                socketWrapper.cleanUp();
-                socketWrapper.initialize(token, handleNewLogin, forceRefreshToken, setConnected);
+                socketWrapper.initialize(token, handleNewLogin, stubbornRefresh, setConnected);
             }
         }
         else {
-            if (!!socketWrapper && connected) {
-                console.log('Disconnecting socket');
+            if (!!socketWrapper) {
+                console.log('SocketContext cleaning up socket');
                 socketWrapper.cleanUp();
             }
         }
-    }, [handleNewLogin, token, forceRefreshToken, connected])
+    }, [handleNewLogin, token, stubbornRefresh, connected])
 
     return (
         <SocketContext.Provider value={{
