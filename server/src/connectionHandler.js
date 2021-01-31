@@ -8,7 +8,7 @@ class ConnectionData {
         this.isActive = isActive;
     }
 }
-
+//TODO: Try passing in true to disconnect calls. This will close the underlying connection too.
 class ConnectionHandler {
     constructor(server, auth, maxReceiversCount, maxSendersCount) {
         this.receivers = [];
