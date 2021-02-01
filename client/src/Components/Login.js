@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import { AuthContext } from "../Contexts/AuthContext";
+import "./Login.css";
+import logo2 from "../Resources/krea-logo-2.png";
 
 const Login = (props) => {
   const { auth } = useContext(AuthContext);
@@ -41,7 +43,12 @@ const Login = (props) => {
     ],
   };
   return (
-    <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
+    <div className="Login">
+      <img src={logo2} alt="logo" className="Login-Logo" />
+      <p className="Login-Title"> AUDIENCE INTERACTION TOOL</p>
+      <p>Sign in to continue:</p>
+      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
+    </div>
   );
 };
 
