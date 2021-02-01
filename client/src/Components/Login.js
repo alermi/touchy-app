@@ -44,7 +44,18 @@ const Login = (props) => {
   };
   return (
     <div className="Login">
-      <img src={logo2} alt="logo" className="Login-Logo" />
+      <a
+        href="https://krea.today"
+        style={{
+          display: "flex",
+          marginLeft: "35vw",
+          marginRight: "35vw",
+          marginTop: "auto",
+          marginBottom: "auto",
+        }}
+      >
+        <img src={logo2} alt="logo" className="Login-Logo" />
+      </a>
       <p className="Login-Title"> AUDIENCE INTERACTION TOOL</p>
       <p>Sign in to continue:</p>
       <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
