@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { Redirect, Route } from 'react-router-dom'
 import { AuthContext } from '../Contexts/AuthContext'
+import Banner from '../Components/Banner'
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
     const { currentUser } = useContext(AuthContext);
@@ -8,7 +9,10 @@ const ProtectedRoute = ({ component: Component, ...rest }) => {
         <Route {...rest} render={props => (
 
             currentUser != null ?
-                <Component {...props} />
+                <>
+                    <Banner />
+                    <Component {...props} />
+                </>
                 :
                 <Redirect to="/login" />
 

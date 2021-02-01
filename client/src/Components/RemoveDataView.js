@@ -1,11 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { AuthContext } from '../Contexts/AuthContext'
-import { useHistory } from 'react-router-dom';
 
 const RemoveDataView = () => {
 
     const { currentUser } = useContext(AuthContext)
-    const history = useHistory();
     const [showingAlert, setShowingAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
 
@@ -33,9 +31,6 @@ const RemoveDataView = () => {
             </p>
             <div>
                 <button onClick={onClick}>Delete Data</button>
-            </div>
-            <div>
-                <button onClick={() => { history.push('/') }}>Go Back</button>
             </div>
             {showingAlert ?
                 <strong>{alertMessage}</strong>

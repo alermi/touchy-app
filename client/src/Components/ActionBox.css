@@ -1,19 +1,19 @@
 .Action-box{
-    background-color: #177E89;
-    border-radius: 25px;
-    min-height: 65vh;
-    justify-content: center;
-    margin-top:5vh;
-    margin-bottom: auto;
-    margin-left: auto;
-    margin-right: auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20vh;
+    margin-left: 20px;
+    margin-right: 20px;
+    flex-flow: column;
+    flex-grow: 1;
     display: flex;
     border: 2px solid #323031;
   }
 
   .cursor {
-    background-color: #084C61;
-    border: 2px solid #323031;
+    /* background-color: #ffffff; */
+    border: 2px solid #000000;
     width: 50px;
     height: 50px;
     border-radius: 50%;

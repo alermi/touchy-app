@@ -1,8 +1,13 @@
 .App {
-  background-color: #084C61;
+  background-color: #000000;
   text-align: center;
   overflow:hidden;
   min-height: 100vh;
+  font-family: 'Courier New';
+  color: #ffffff;
+  /* height: 100%; */
+  display: flex;
+  flex-direction: column;
 }
 
 .App-header {
@@ -12,8 +17,6 @@
   justify-content: center;
   margin-top:3vh;
   font-size: calc(10px + 2vmin);
-  color: #323031;
+  color: #ffffff;
 }
-
-
 

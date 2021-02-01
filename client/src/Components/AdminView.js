@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { SocketContext } from '../Contexts/SocketContext'
-import { useHistory } from 'react-router-dom';
 
 const AdminView = (props) => {
     const { socket, connected } = useContext(SocketContext)
@@ -8,7 +7,6 @@ const AdminView = (props) => {
     const [adminEmail, setAdminEmail] = useState('');
     const [showingAlert, setShowingAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
-    const history = useHistory();
 
     useEffect(() => {
         if (showingAlert) {
@@ -54,9 +52,6 @@ const AdminView = (props) => {
     }
     return (
         <>
-            <header className="App-header">
-                <b>Socket Status: {connected ? 'Active' : 'Not Active'}</b>
-            </header>
             <form onSubmit={handleArtistRequestSubmit}>
                 <h4>Upgrade user to artist</h4>
                 <label>
@@ -81,7 +76,6 @@ const AdminView = (props) => {
                     <></>
                 }
             </div>
-            <button onClick={() => { history.push('/') }}>Go Back</button>
         </>
     )
 }

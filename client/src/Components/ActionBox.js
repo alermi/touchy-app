@@ -5,7 +5,7 @@ import Cursor from './Cursor';
 import { SocketContext } from '../Contexts/SocketContext'
 
 const ActionBox = (props) => {
-    const {socket, connected} = useContext(SocketContext);
+    const { socket, connected } = useContext(SocketContext);
 
     const [isActive, setIsActive] = useState(false);
     const [isPositionOutside, setIsPositionOutside] = useState(true);
@@ -70,17 +70,25 @@ const ActionBox = (props) => {
         <>
             <div className="Action-box">
                 <ReactCursorPosition
-                    style={{ width: '100%' }}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        flexGrow: '1'
+                    }}
                     activationInteractionTouch='touch'
                     onPositionChanged={onPositionChanged}
                     onActivationChanged={onActivationChanged}
                 >
 
                     <Cursor className="cursor" />
+                    {/* <div style={{
+                        color: 'black',
+                    }}>
                         isActive: {isActive ? 'true ' : 'false '}  <br />
                         isPositionOutside: {isPositionOutside ? 'true' : 'false'} <br />
                         x: {activeProportions.x}  <br />
                         y: {activeProportions.y} <br />
+                    </div> */}
                 </ReactCursorPosition>
             </div>
         </>
