@@ -1,76 +1,84 @@
 // If setting this to false, make sure the backend server is already started.
 const LOCAL_TEST = true;
 // const LOCAL_TEST = false;
-const SOCKET_TYPE_RECEIVER = 'receiver';
-const SOCKET_TYPE_SENDER = 'sender';
+const SOCKET_TYPE_RECEIVER = "receiver";
+const SOCKET_TYPE_SENDER = "sender";
 const DEFAULT_X_VALUE = 0;
 const DEFAULT_Y_VALUE = 0;
 const DEFAULT_IS_ACTIVE_VALUE = false;
-const io = require('socket.io-client');
-const assert = require('assert');
+const io = require("socket.io-client");
+const assert = require("assert");
 
 const WAIT_TIME_TO_BE_REGISTERED = 50;
 
-var TokenGenerator = require('./tokenGenerator');
+var TokenGenerator = require("./tokenGenerator");
 let tokenGenerator = new TokenGenerator(LOCAL_TEST);
 
 let serverURL;
 let server;
 let connectionHandler;
+let socketIdToUidMap;
 //TODO: Remove the authorization from senders and test the rejection of sockets.
 before(() => {
   if (LOCAL_TEST) {
     // Server setup
-    var app = require('../app');
-    var http = require('http');
+    var app = require("../app");
+    var http = require("http");
     var port = 8080;
-    app.set('port', port);
+    app.set("port", port);
     server = http.createServer(app);
-    var MockAuthenticator = require('./mockAuth');
+    var MockAuthenticator = require("./mockAuth");
     const mockAuth = new MockAuthenticator();
-    var ConnectionHandler = require('../src/connectionHandler');
+    var ConnectionHandler = require("../src/connectionHandler");
     connectionHandler = new ConnectionHandler(server, mockAuth, 5, 100);
+    socketIdToUidMap = new Map();
 
     server.listen(port);
-    app.set('server', server);
+    app.set("server", server);
     serverURL = "http://localhost:" + port + "/";
-  }
-  else {
+  } else {
     serverURL = "https://touchy-backend.azurewebsites.net";
   }
-})
+});
 
 after(() => {
   if (LOCAL_TEST) {
     server.close();
   }
-})
+});
 
-describe('Single sender single receiver, sender connects first', function () {
+describe("Single sender single receiver, sender connects first", function () {
   this.timeout(10000);
   let ioSend;
   let ioReceive;
-
   beforeEach(() => {
     if (ioSend == null || !ioSend.connected) {
+      let newToken = tokenGenerator.getNextToken();
       ioSend = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_SENDER
+          socketType: SOCKET_TYPE_SENDER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
+      });
+      ioSend.on("connect", () => {
+        socketIdToUidMap.set(ioSend.id, newToken);
       });
     }
 
     if (ioReceive == null || !ioReceive.connected) {
+      let newToken = tokenGenerator.getNextToken();
       ioReceive = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_RECEIVER
+          socketType: SOCKET_TYPE_RECEIVER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
+      });
+      ioReceive.on("connect", () => {
+        socketIdToUidMap.set(ioReceive.id, newToken);
       });
     }
   });
@@ -83,11 +91,11 @@ describe('Single sender single receiver, sender connects first', function () {
     if (ioReceive.connected) {
       ioReceive.close();
     }
+    socketIdToUidMap = new Map();
     tokenGenerator.reset();
   });
 
-
-  it('Send and receive single random datapoint', done => {
+  it("Send and receive single random datapoint", (done) => {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
@@ -96,16 +104,16 @@ describe('Single sender single receiver, sender connects first', function () {
     }, WAIT_TIME_TO_BE_REGISTERED);
 
     let receivedValidMessage = false;
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       if (!receivedValidMessage && data[3] == true) {
-        assert.strictEqual(data[0], ioSend.id);
+        // console.log(socketIdToUidMap);
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         receivedValidMessage = true;
         return;
-      }
-      else if (receivedValidMessage) {
-        assert.strictEqual(data[0], ioSend.id);
+      } else if (receivedValidMessage) {
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         assert.strictEqual(data[3], false);
@@ -117,11 +125,11 @@ describe('Single sender single receiver, sender connects first', function () {
     });
   });
 
-  it('Ignore invalid messages', done => {
+  it("Ignore invalid messages", (done) => {
     let numMessagesReceived = 0;
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       numMessagesReceived++;
-      assert.strictEqual(data[0], ioSend.id);
+      assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
       assert.strictEqual(data[1], DEFAULT_X_VALUE);
       assert.strictEqual(data[2], DEFAULT_Y_VALUE);
       assert.strictEqual(data[3], DEFAULT_IS_ACTIVE_VALUE);
@@ -151,7 +159,7 @@ describe('Single sender single receiver, sender connects first', function () {
     }, WAIT_TIME_TO_BE_REGISTERED);
   });
 
-  it('Ignore messages sent by a receiver', done => {
+  it("Ignore messages sent by a receiver", (done) => {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
@@ -161,18 +169,17 @@ describe('Single sender single receiver, sender connects first', function () {
       ioSend.send([randX, randY]);
     }, WAIT_TIME_TO_BE_REGISTERED);
 
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       //Send a message back, should be ignored and we should receive the expected messages
       ioReceive.send([0.5, 0.5]);
       if (!receivedValidMessage && data[3] == true) {
-        assert.strictEqual(data[0], ioSend.id);
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         receivedValidMessage = true;
         return;
-      }
-      else if (receivedValidMessage) {
-        assert.strictEqual(data[0], ioSend.id);
+      } else if (receivedValidMessage) {
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         assert.strictEqual(data[3], false);
@@ -184,7 +191,7 @@ describe('Single sender single receiver, sender connects first', function () {
     });
   });
 
-  it('Ignore multiple requests to join receivers', done => {
+  it("Ignore multiple requests to join receivers", (done) => {
     // Extra join receivers request
     // ioReceive.emit('joinReceivers');
     // Get random x and y to send out and receive
@@ -195,18 +202,17 @@ describe('Single sender single receiver, sender connects first', function () {
     }, WAIT_TIME_TO_BE_REGISTERED);
 
     let receivedValidMessage = false;
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       // Extra join receivers request
       // ioReceive.emit('joinReceivers');
       if (!receivedValidMessage && data[3] == true) {
-        assert.strictEqual(data[0], ioSend.id);
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         receivedValidMessage = true;
         return;
-      }
-      else if (receivedValidMessage) {
-        assert.strictEqual(data[0], ioSend.id);
+      } else if (receivedValidMessage) {
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         assert.strictEqual(data[3], false);
@@ -219,7 +225,7 @@ describe('Single sender single receiver, sender connects first', function () {
   });
 });
 
-describe('Single sender single receiver, receiver connects first', function () {
+describe("Single sender single receiver, receiver connects first", function () {
   this.timeout(10000);
   let ioSend;
   let ioReceive;
@@ -232,55 +238,62 @@ describe('Single sender single receiver, receiver connects first', function () {
     if (ioReceive.connected) {
       ioReceive.close();
     }
+    socketIdToUidMap = new Map();
   });
 
-  it('Send and receive single random datapoint', done => {
+  it("Send and receive single random datapoint", (done) => {
     // Get random x and y to send out and receive
     const randX = Math.random();
     const randY = Math.random();
     if (ioReceive == null || !ioReceive.connected) {
+      let newToken = tokenGenerator.getNextToken();
       ioReceive = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_RECEIVER
+          socketType: SOCKET_TYPE_RECEIVER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
+      });
+      ioReceive.on("connect", () => {
+        socketIdToUidMap.set(ioReceive.id, newToken);
       });
     }
     setTimeout(() => {
+      let newToken = tokenGenerator.getNextToken();
+
       if (ioSend == null || !ioSend.connected) {
         ioSend = io(serverURL, {
           query: {
-            socketType: SOCKET_TYPE_SENDER
+            socketType: SOCKET_TYPE_SENDER,
           },
           auth: {
-            token: tokenGenerator.getNextToken()
-          }
+            token: newToken,
+          },
+        });
+        ioSend.on("connect", () => {
+          socketIdToUidMap.set(ioSend.id, newToken);
+          setTimeout(() => {
+            ioSend.send([randX, randY]);
+          }, WAIT_TIME_TO_BE_REGISTERED);
         });
       }
-      ioSend.on('connect', () => {
-        setTimeout(() => {
-          ioSend.send([randX, randY]);
-        }, WAIT_TIME_TO_BE_REGISTERED)
-      });
-    }, 1000)
+    }, 1000);
 
     let receivedValidMessage = false;
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       // This should have no affect since we are already receiving messages
       if (LOCAL_TEST) {
         connectionHandler.startSending();
       }
       if (!receivedValidMessage && data[3] == true) {
-        assert.strictEqual(data[0], ioSend.id);
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         receivedValidMessage = true;
         return;
-      }
-      else if (receivedValidMessage) {
-        assert.strictEqual(data[0], ioSend.id);
+      } else if (receivedValidMessage) {
+        assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
         assert.strictEqual(data[1], randX);
         assert.strictEqual(data[2], randY);
         assert.strictEqual(data[3], false);
@@ -292,30 +305,36 @@ describe('Single sender single receiver, receiver connects first', function () {
     });
   });
 
-  it('Ignore invalid messages', done => {
+  it("Ignore invalid messages", (done) => {
     if (ioReceive == null || !ioReceive.connected) {
+      let newToken = tokenGenerator.getNextToken();
       ioReceive = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_RECEIVER
+          socketType: SOCKET_TYPE_RECEIVER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
+      });
+      ioReceive.on("connect", () => {
+        socketIdToUidMap.set(ioReceive.id, newToken);
       });
     }
     setTimeout(() => {
+      let newToken = tokenGenerator.getNextToken();
       if (ioSend == null || !ioSend.connected) {
         ioSend = io(serverURL, {
           query: {
-            socketType: SOCKET_TYPE_SENDER
+            socketType: SOCKET_TYPE_SENDER,
           },
           auth: {
-            token: tokenGenerator.getNextToken()
-          }
+            token: newToken,
+          },
         });
       }
-      ioSend.on('connect', () => {
+      ioSend.on("connect", () => {
         setTimeout(() => {
+          socketIdToUidMap.set(ioSend.id, newToken);
           // Invalid messages
           ioSend.send([0, 2]);
           ioSend.send([-1, 0.5]);
@@ -331,14 +350,14 @@ describe('Single sender single receiver, receiver connects first', function () {
             longString += longString;
           }
           ioSend.send([longString, longString]);
-        }, WAIT_TIME_TO_BE_REGISTERED)
+        }, WAIT_TIME_TO_BE_REGISTERED);
       });
-    }, 1000)
+    }, 1000);
 
     let numMessagesReceived = 0;
-    ioReceive.on('message', data => {
+    ioReceive.on("message", (data) => {
       numMessagesReceived++;
-      assert.strictEqual(data[0], ioSend.id);
+      assert.strictEqual(data[0], socketIdToUidMap.get(ioSend.id));
       assert.strictEqual(data[1], DEFAULT_X_VALUE);
       assert.strictEqual(data[2], DEFAULT_Y_VALUE);
       assert.strictEqual(data[3], DEFAULT_IS_ACTIVE_VALUE);
@@ -351,103 +370,113 @@ describe('Single sender single receiver, receiver connects first', function () {
   });
 });
 
-describe('Single receiver, no senders', function () {
+describe("Single receiver, no senders", function () {
   this.timeout(11000);
 
   afterEach(() => {
     tokenGenerator.reset();
   });
-  it('The receiver should not receive any messages', (done) => {
+  it("The receiver should not receive any messages", (done) => {
     let ioReceive = io(serverURL, {
       query: {
-        socketType: SOCKET_TYPE_RECEIVER
+        socketType: SOCKET_TYPE_RECEIVER,
       },
       auth: {
-        token: tokenGenerator.getNextToken()
-      }
+        token: tokenGenerator.getNextToken(),
+      },
     });
 
-    ioReceive.on('message', data => {
-      throw new Error('The receiver should not have received any messages since there are no senders');
+    ioReceive.on("message", (data) => {
+      throw new Error(
+        "The receiver should not have received any messages since there are no senders"
+      );
     });
 
     if (LOCAL_TEST) {
       setTimeout(() => {
         // This should not do anything since there are no senders.
         connectionHandler.sendDataToReceivers();
-      }, 3000)
+      }, 3000);
       setTimeout(() => {
         // This should not do anything since we already shouldnt be sending.
         connectionHandler.stopSending();
-      }, 7000)
+      }, 7000);
     }
 
     setTimeout(() => {
       if (LOCAL_TEST) {
         if (connectionHandler.interval != false) {
-          throw new Error('The interval should be false since there are no senders');
+          throw new Error(
+            "The interval should be false since there are no senders"
+          );
         }
       }
       ioReceive.close();
       done();
-    }, 9000)
-  })
-})
+    }, 9000);
+  });
+});
 
-describe('Multiple receivers, no senders', function () {
+describe("Multiple receivers, no senders", function () {
   this.timeout(10000);
 
   afterEach(() => {
     tokenGenerator.reset();
   });
-  
-  it('The receivers should not receive any messages', (done) => {
+
+  it("The receivers should not receive any messages", (done) => {
     let ioReceive1 = io(serverURL, {
       query: {
-        socketType: SOCKET_TYPE_RECEIVER
+        socketType: SOCKET_TYPE_RECEIVER,
       },
       auth: {
-        token: tokenGenerator.getNextToken()
-      }
+        token: tokenGenerator.getNextToken(),
+      },
     });
     let ioReceive2 = io(serverURL, {
       query: {
-        socketType: SOCKET_TYPE_RECEIVER
+        socketType: SOCKET_TYPE_RECEIVER,
       },
       auth: {
-        token: tokenGenerator.getNextToken()
-      }
+        token: tokenGenerator.getNextToken(),
+      },
     });
 
-    ioReceive1.on('message', data => {
-      throw new Error('The receiver should not have received any messages since there are no senders');
+    ioReceive1.on("message", (data) => {
+      throw new Error(
+        "The receiver should not have received any messages since there are no senders"
+      );
     });
 
-    ioReceive2.on('message', data => {
-      throw new Error('The receiver should not have received any messages since there are no senders');
+    ioReceive2.on("message", (data) => {
+      throw new Error(
+        "The receiver should not have received any messages since there are no senders"
+      );
     });
 
     if (LOCAL_TEST) {
       setTimeout(() => {
         // This should not do anything since there are no senders.
         connectionHandler.sendDataToReceivers();
-      }, 3000)
+      }, 3000);
     }
 
     setTimeout(() => {
       if (LOCAL_TEST) {
         if (connectionHandler.interval != false) {
-          throw new Error('The interval should be false since there are no senders');
+          throw new Error(
+            "The interval should be false since there are no senders"
+          );
         }
       }
       ioReceive1.close();
       ioReceive2.close();
       done();
-    }, 5000)
-  })
-})
+    }, 5000);
+  });
+});
 
-describe('Multiple senders, multiple receivers', function () {
+describe("Multiple senders, multiple receivers", function () {
   this.timeout(30000);
   const sendersCount = 100;
   const receiversCount = 5;
@@ -457,36 +486,44 @@ describe('Multiple senders, multiple receivers', function () {
   beforeEach(() => {
     senders = [];
     for (let i = 0; i < sendersCount; i++) {
+      let newToken = tokenGenerator.getNextToken();
       let tempSender = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_SENDER
+          socketType: SOCKET_TYPE_SENDER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
       });
       senders.push({
         socket: tempSender,
         lastSentX: null,
-        lastSentY: null
+        lastSentY: null,
+      });
+      tempSender.on("connect", () => {
+        socketIdToUidMap.set(tempSender.id, newToken);
       });
     }
     receivers = [];
     for (let i = 0; i < receiversCount; i++) {
+      let newToken = tokenGenerator.getNextToken();
       let tempReceiver = io(serverURL, {
         query: {
-          socketType: SOCKET_TYPE_RECEIVER
+          socketType: SOCKET_TYPE_RECEIVER,
         },
         auth: {
-          token: tokenGenerator.getNextToken()
-        }
+          token: newToken,
+        },
       });
-
       receivers.push(tempReceiver);
+      tempReceiver.on("connect", () => {
+        socketIdToUidMap.set(tempReceiver.id, newToken);
+      });
     }
   });
 
   afterEach(() => {
+    socketIdToUidMap = new Map();
     tokenGenerator.reset();
     for (let i = 0; i < sendersCount; i++) {
       if (senders[i].socket.connected) {
@@ -500,8 +537,7 @@ describe('Multiple senders, multiple receivers', function () {
     }
   });
 
-  it('Receive proper messages from all senders', (done) => {
-
+  it("Receive proper messages from all senders", (done) => {
     //This should execute after all the senders have connected hopefully
     setTimeout(() => {
       for (let i = 0; i < senders.length; i++) {
@@ -512,33 +548,45 @@ describe('Multiple senders, multiple receivers', function () {
           senders[i].lastSentX = randX;
           senders[i].lastSentY = randY;
         } else {
-          throw new Error("Sender " + i + " not yet connected when tried to send messages");
+          throw new Error(
+            "Sender " + i + " not yet connected when tried to send messages"
+          );
         }
       }
-    }, 10000)
+    }, 10000);
     setTimeout(() => {
       let receivedValidMessagesCount = 0;
       for (let i = 0; i < receiversCount; i++) {
-        receivers[i].on('message', data => {
+        receivers[i].on("message", (data) => {
           let receivedMap = convertMessageToMap(data, senders);
           assert.strictEqual(receivedMap.size, sendersCount);
 
           for (j = 0; j < sendersCount; j++) {
             let currSenderEntry = senders[j];
-            assert.strictEqual(currSenderEntry.lastSentX, receivedMap.get(currSenderEntry.socket.id).x);
-            assert.strictEqual(currSenderEntry.lastSentY, receivedMap.get(currSenderEntry.socket.id).y);
+            assert.strictEqual(
+              currSenderEntry.lastSentX,
+              receivedMap.get(socketIdToUidMap.get(currSenderEntry.socket.id)).x
+            );
+            assert.strictEqual(
+              currSenderEntry.lastSentY,
+              receivedMap.get(socketIdToUidMap.get(currSenderEntry.socket.id)).y
+            );
           }
           receivedValidMessagesCount++;
           // Stop when we received 10 messages per receiver.
           // TODO: Check if all receivers actually received messages
-          if (receivedValidMessagesCount == (receiversCount * 10)) {
-            senders.forEach((sender) => { sender.socket.close(); });
-            receivers.forEach((receiver) => { receiver.close(); });
+          if (receivedValidMessagesCount == receiversCount * 10) {
+            senders.forEach((sender) => {
+              sender.socket.close();
+            });
+            receivers.forEach((receiver) => {
+              receiver.close();
+            });
             done();
           }
         });
       }
-    }, 14000)
+    }, 14000);
   });
 });
 
@@ -547,12 +595,16 @@ convertMessageToMap = (list, senders) => {
     throw new Error("Asked to convert a list that does not have a valid size");
   }
   let senderIds = [];
-  senders.forEach((sender) => senderIds.push(sender.socket.id));
+  senders.forEach((sender) =>
+    senderIds.push(socketIdToUidMap.get(sender.socket.id))
+  );
   var returnMap = new Map();
   for (let i = 0; i < list.length; i += 5) {
     let senderId = list[i];
     if (!senderIds.includes(senderId)) {
-      throw new Error("Sender id in list is not in our senders list.");
+      throw new Error(
+        "Sender id " + senderId + " in list is not in our senders list."
+      );
     }
     let x = list[i + 1];
     let y = list[i + 2];
@@ -562,8 +614,8 @@ convertMessageToMap = (list, senders) => {
       x: x,
       y: y,
       isActive: isActive,
-      timeStamp: timeStamp
+      timeStamp: timeStamp,
     });
   }
   return returnMap;
-}
+};
