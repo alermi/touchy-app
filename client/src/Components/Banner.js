@@ -30,8 +30,7 @@ const Banner = (props) => {
             closeMenu();
           }}
         >
-          {" "}
-          HOME{" "}
+          HOME
         </p>
         <p
           className="menu-item"
@@ -39,8 +38,7 @@ const Banner = (props) => {
             auth.signOut();
           }}
         >
-          {" "}
-          SIGN OUT{" "}
+          SIGN OUT
         </p>
         <p
           className="menu-item"
@@ -59,8 +57,7 @@ const Banner = (props) => {
             }
           }}
         >
-          {" "}
-          {isAdmin ? "Admin Panel" : "Delete Account"}{" "}
+          {isAdmin ? "Admin Panel" : "Delete Account"}
         </p>
       </Menu>
       <a
