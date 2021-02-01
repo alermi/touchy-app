@@ -63,7 +63,7 @@
   .bm-item {
     /* display: flex; */
     /* padding: 0.2vh 0 0.2vh; */
-    
+    display: inline-block;
     /* justify-content: flex-end, */
   }
   
