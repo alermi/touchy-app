@@ -1,16 +1,16 @@
 .Banner {
-    display: flex;
-    background-color: #ffffff;
-    height: 70px;
+  display: flex;
+  background-color: #ffffff;
+  height: 70px;
 }
 
 .Logo {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    height: 40px;
-    margin-left: auto;
-    margin-right: 6vw;
-    margin-top: auto;
-    margin-bottom: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  height: 40px;
+  margin-left: auto;
+  margin-right: 6vw;
+  margin-top: auto;
+  margin-bottom: auto;
 }

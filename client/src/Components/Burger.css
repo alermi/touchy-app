@@ -1,86 +1,95 @@
 /* Position and sizing of burger button */
+
 .bm-burger-button {
-    position: relative;
-    width: 36px;
-    height: 30px;
-    margin-left: 6vw;
-    margin-top: 20px;
-    margin-right: auto;
-  
-  }
-  
-  /* Color/shape of burger icon bars */
-  .bm-burger-bars {
-    border-radius: 3px;
-    background: #000000;
-  }
-  
-  /* Color/shape of burger icon bars on hover*/
-  .bm-burger-bars-hover {
-    background: #000000;
-  }
-  
-  /* Position and sizing of clickable cross button */
-  .bm-cross-button {
-    height: 24px;
-    width: 24px;
-  }
-  
-  /* Color/shape of close button cross */
-  .bm-cross {
-    background: #7f8486;
-  }
-  
-  /*
+  position: relative;
+  width: 36px;
+  height: 30px;
+  margin-left: 6vw;
+  margin-top: 20px;
+  margin-right: auto;
+}
+
+/* Color/shape of burger icon bars */
+
+.bm-burger-bars {
+  border-radius: 3px;
+  background: #000000;
+}
+
+/* Color/shape of burger icon bars on hover*/
+
+.bm-burger-bars-hover {
+  background: #000000;
+}
+
+/* Position and sizing of clickable cross button */
+
+.bm-cross-button {
+  height: 24px;
+  width: 24px;
+}
+
+/* Color/shape of close button cross */
+
+.bm-cross {
+  background: #7f8486;
+}
+
+/*
   Sidebar wrapper styles
   Note: Beware of modifying this element as it can break the animations - you should not need to touch it in most cases
   */
-  .bm-menu-wrap {
-    touch-action: none;
-    top:0px;
-    position: fixed;
-    height: 100%;
-    overflow:hidden;
-  }
-  
-  /* General sidebar styles */
-  .bm-menu {
-    touch-action: none;
-    background: #ffffff;
-    /* padding: 2.5em 1.5em 0; */
-    font-size: 1.35em;
-    overflow:hidden;
-  }
-  
-  /* Morph shape necessary with bubble or elastic */
-  .bm-morph-shape {
-    fill: #373a47;
-  }
-  
-  /* Wrapper for item list */
-  .bm-item-list {
-    touch-action: none;
-    color: #000000;
-    padding: 0.8em;
-    display: flex;
-    flex-direction: column;
-    overflow:hidden;
-  }
-  
-  /* Individual item */
-  .bm-item {
-    touch-action: none;
 
-    overflow:hidden;
-    /* display: flex; */
-    /* padding: 0.2vh 0 0.2vh; */
-    display: inline-block;
-    /* justify-content: flex-end, */
-  }
-  
-  /* Styling of overlay */
-  .bm-overlay {
-    overflow:hidden;
-    touch-action: none;
-    background: rgba(221, 47, 47, 0.3);
-  }
+.bm-menu-wrap {
+  touch-action: none;
+  top: 0px;
+  position: fixed;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* General sidebar styles */
+
+.bm-menu {
+  touch-action: none;
+  background: #ffffff;
+  /* padding: 2.5em 1.5em 0; */
+  font-size: 1.35em;
+  overflow: hidden;
+}
+
+/* Morph shape necessary with bubble or elastic */
+
+.bm-morph-shape {
+  fill: #373a47;
+}
+
+/* Wrapper for item list */
+
+.bm-item-list {
+  touch-action: none;
+  color: #000000;
+  padding: 0.8em;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Individual item */
+
+.bm-item {
+  touch-action: none;
+  overflow: hidden;
+  /* display: flex; */
+  /* padding: 0.2vh 0 0.2vh; */
+  display: inline-block;
+  /* justify-content: flex-end, */
+}
+
+/* Styling of overlay */
+
+.bm-overlay {
+  overflow: hidden;
+  touch-action: none;
+  background: rgba(221, 47, 47, 0.3);
+}
