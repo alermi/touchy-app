@@ -67,7 +67,17 @@ const ActionBox = (props) => {
 
   return (
     <>
-      <div className="Action-box">
+      <div
+        className="Action-box"
+        style={{
+          backgroundColor: isActive && !isPositionOutside ? "white" : "black",
+          border:
+            isActive && !isPositionOutside
+              ? " 2px solid black"
+              : " 2px solid white",
+          transition: "all 0.8s",
+        }}
+      >
         <ReactCursorPosition
           style={{
             width: "100%",
