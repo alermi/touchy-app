@@ -2,16 +2,21 @@
   background-color: #000000;
   text-align: center;
   overflow:hidden;
-  min-height: 100vh;
+  height: 100vh;
   font-family: 'Courier New';
   color: #ffffff;
   /* height: 100%; */
   display: flex;
   flex-direction: column;
+  /* flex-grow: 1 */
+
+  touch-action: none;
 }
 
 .App-header {
   display: flex;
+  overflow:hidden;
+  touch-action: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;

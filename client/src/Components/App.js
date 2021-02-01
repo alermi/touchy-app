@@ -17,7 +17,7 @@ dotenv.config();
 const App = () => {
 
   return (
-    <div className="App" style={{ touchAction: 'none' }}>
+    <div className="App">
       <AuthContextProvider>
         <SocketContextProvider>
           <Switch>
