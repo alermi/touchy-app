@@ -16,10 +16,10 @@ const Login = (props) => {
         // console.log('User ' + user + ' signed in successfully with credential: ' + credential);
         return false;
       },
-      // signInFailure: function(error) {
-      //     console.log('Failed to sign in.');
-      //     //TODO: Handle the sign in failure
-      // }
+      signInFailure: function (error) {
+        console.log("SignInFailure callback ran.");
+        //TODO: Handle the sign in failure
+      },
     },
     signInOptions: [
       auth.GoogleAuthProvider.PROVIDER_ID,
