@@ -31,8 +31,6 @@ class SocketWrapper {
 
     this.socket.on("disconnect", (reason) => {
       console.log("Disconnected from server socket.io. Reason: " + reason);
-      // TODO: Add the check if the internet is on. If not, add an event listener to
-      // window (online) and call forceRefreshToken then.
       setConnected(false);
     });
 

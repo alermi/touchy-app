@@ -105,7 +105,7 @@ class AuthContextProvider extends Component {
         return Promise.resolve(token);
       });
   }
-  //TODO: Move this to authContext
+
   stubbornRefresh() {
     console.log("StubbornRefresh called");
     this.forceRefreshToken().catch((err) => {

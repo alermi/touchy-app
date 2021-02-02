@@ -53,8 +53,6 @@ maxApi.addHandler("login", () => {
     console.log("Already logged in.");
     return;
   }
-  //TODO: Check what happens when the receiver also logs in from the same email as sender. Possibly
-  // change the regular user signin to password instead of link and require email verification.
   firebase
     .auth()
     .signInWithEmailAndPassword(process.env.EMAIL, process.env.PASSWORD)
@@ -95,8 +93,6 @@ function initializeSocket(token) {
 
   socket.on("disconnect", (reason) => {
     console.log("Socket disconnected. Reason: " + reason);
-    //TODO: Possibly update the token value here so that we have a valid
-    //token if we connect again.
     if (currentUser != null) {
       currentUser
         .getIdToken(/* forceRefresh */ true)
