@@ -41,21 +41,18 @@
   */
 
 .bm-menu-wrap {
-  touch-action: none;
   top: 0px;
   position: fixed;
   height: 100%;
-  overflow: hidden;
 }
 
 /* General sidebar styles */
 
 .bm-menu {
-  touch-action: none;
   background: #ffffff;
+  height: 100%;
   /* padding: 2.5em 1.5em 0; */
   font-size: 1.35em;
-  overflow: hidden;
 }
 
 /* Morph shape necessary with bubble or elastic */
@@ -67,19 +64,15 @@
 /* Wrapper for item list */
 
 .bm-item-list {
-  touch-action: none;
   color: #000000;
-  padding: 0.8em;
+  /* padding: 0.8em; */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 /* Individual item */
 
 .bm-item {
-  touch-action: none;
-  overflow: hidden;
   /* display: flex; */
   /* padding: 0.2vh 0 0.2vh; */
   display: inline-block;
@@ -89,7 +82,5 @@
 /* Styling of overlay */
 
 .bm-overlay {
-  overflow: hidden;
-  touch-action: none;
   background: rgba(221, 47, 47, 0.3);
 }

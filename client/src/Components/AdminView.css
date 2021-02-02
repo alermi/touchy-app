@@ -1,12 +1,11 @@
 .Admin-View {
   background-color: #ffffff;
   text-align: center;
-  overflow: auto;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
   color: #000000;
   display: flex;
   flex-direction: column;
-  /* touch-action: pan-y; */
 }
 
 .Admin-Form {

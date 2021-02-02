@@ -44,7 +44,6 @@ const Burger = () => {
           className="menu-item"
           style={{
             marginTop: "auto",
-            marginBottom: "50px",
             color: "gray",
           }}
           onClick={() => {

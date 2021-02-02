@@ -1,23 +1,10 @@
 .App {
   background-color: #000000;
   text-align: center;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   font-family: "Courier New";
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  touch-action: none;
-
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  vertical-align: baseline;
-  /* flex-grow: 1; */
-  /* flex: 1; */
-  /* height: 100%; */
-  /* margin: 0; */
-  /* padding: 0; */
-  /* width: auto; */
 }
