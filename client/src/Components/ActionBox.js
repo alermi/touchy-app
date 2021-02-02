@@ -75,7 +75,7 @@ const ActionBox = (props) => {
             isActive && !isPositionOutside
               ? " 2px solid black"
               : " 2px solid white",
-          transition: "all 0.8s",
+          transition: "all 0.5s",
         }}
       >
         <ReactCursorPosition
