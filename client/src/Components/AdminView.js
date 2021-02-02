@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { SocketContext } from "../Contexts/SocketContext";
+import "./AdminView.css";
 
 const AdminView = (props) => {
   const { socket, connected } = useContext(SocketContext);
@@ -51,34 +52,39 @@ const AdminView = (props) => {
     setAdminEmail(event.target.value);
   };
   return (
-    <>
+    <div className="Admin-View">
       <form onSubmit={handleArtistRequestSubmit}>
         <h4>Upgrade user to artist</h4>
-        <label>
-          Email:
-          <input
-            type="text"
-            value={artistEmail}
-            onChange={handleArtistEmailChange}
-          />
-        </label>
+        <div>
+          <label>
+            Email:
+            <input
+              className="Admin-Form"
+              type="text"
+              value={artistEmail}
+              onChange={handleArtistEmailChange}
+            />
+          </label>
+        </div>
         <input type="submit" value="Submit" />
       </form>
-
       <form onSubmit={handleAdminRequestSubmit}>
         <h4>Upgrade user to ADMIN</h4>
-        <label>
-          Email:
-          <input
-            type="text"
-            value={adminEmail}
-            onChange={handleAdminEmailChange}
-          />
-        </label>
+        <div>
+          <label>
+            Email:
+            <input
+              className="Admin-Form"
+              type="text"
+              value={adminEmail}
+              onChange={handleAdminEmailChange}
+            />
+          </label>
+        </div>
         <input type="submit" value="Submit" />
       </form>
       <div>{showingAlert ? <strong>{alertMessage}</strong> : <></>}</div>
-    </>
+    </div>
   );
 };
 

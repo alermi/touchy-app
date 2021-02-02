@@ -3,23 +3,21 @@
   text-align: center;
   overflow: hidden;
   height: 100vh;
+  width: 100vw;
   font-family: "Courier New";
   color: #ffffff;
-  /* height: 100%; */
   display: flex;
   flex-direction: column;
-  /* flex-grow: 1 */
   touch-action: none;
-}
 
-.App-header {
-  display: flex;
-  overflow: hidden;
-  touch-action: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 3vh;
-  font-size: calc(10px + 2vmin);
-  color: #ffffff;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  vertical-align: baseline;
+  /* flex-grow: 1; */
+  /* flex: 1; */
+  /* height: 100%; */
+  /* margin: 0; */
+  /* padding: 0; */
+  /* width: auto; */
 }

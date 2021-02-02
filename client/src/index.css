@@ -5,7 +5,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* width: 100vw; */
+  /* height: max-content; */
+  overflow: hidden;
+  touch-action: none;
 }
+
+/* html,
+head {
+  width: 100vw;
+  overflow: hidden;
+  touch-action: none;
+  width: 100vw;
+  height: max-content;
+} */
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
