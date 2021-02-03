@@ -5,6 +5,7 @@ const LOCAL_TEST = true;
 const NORMAL_SEND_INTERVAL = 1000 / 5;
 const FAST_SEND_INTERVAL = 1000 / 20;
 
+const SENDER_NUM_LIMIT = 100;
 const SocketManager = require("./SocketManager");
 const assert = require("assert");
 
@@ -27,7 +28,7 @@ before(() => {
     var Authenticator = require("../../src/auth");
     const auth = new Authenticator();
     var ConnectionHandler = require("../../src/connectionHandler");
-    connectionHandler = new ConnectionHandler(server, auth, false);
+    connectionHandler = new ConnectionHandler(server, auth, true);
 
     server.listen(port);
     app.set("server", server);
@@ -36,7 +37,7 @@ before(() => {
     serverURL = "https://touchy-backend.azurewebsites.net";
   }
   console.log("Server URL: " + serverURL);
-  tokenGenerator = new LoadTestAccountGenerator(9);
+  tokenGenerator = new LoadTestAccountGenerator(SENDER_NUM_LIMIT);
   socketManager = new SocketManager(serverURL, tokenGenerator);
 });
 
@@ -47,25 +48,30 @@ after(() => {
 });
 
 describe("Load Test", function () {
-  const numSenders = 9;
-  const numReceivers = 5;
+  const numSenders = SENDER_NUM_LIMIT;
+  const numReceivers = 2;
   this.timeout(1000 * 60 * 60); // 1h
   before(async () => {
-    await socketManager.addSenders(numSenders);
     await socketManager.addReceivers(numReceivers);
+    await socketManager.addSenders(numSenders);
+    console.log("Before Ended");
+    return Promise.resolve();
   });
   after(() => {
     socketManager.shutDownAll();
   });
 
   it("Normal send interval", (done) => {
-    const numVals = 50;
-    const msPerNum = 2000;
-    this.timeout(msPerNum * numVals + 10000);
-    socketManager.send(numVals, msPerNum, NORMAL_SEND_INTERVAL);
+    const numVals = 10;
+    const msPerNum = 5000;
+    //Timeout for all sockets to be connected
     setTimeout(() => {
-      socketManager.validate();
-      done();
-    }, numVals * msPerNum + 2000);
+      socketManager.send(numVals, msPerNum, NORMAL_SEND_INTERVAL);
+      // Timeout for all sending and receiving to be done
+      setTimeout(() => {
+        socketManager.validate();
+        done();
+      }, numVals * msPerNum + 10000);
+    }, 30000);
   });
 });
