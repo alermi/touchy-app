@@ -54,6 +54,7 @@ class SocketManager {
   }
 
   validate() {
+    console.log("Starting validation");
     for (let j = 0; j < this.receivers.length; j++) {
       const receiverHistory = this.receivers[j].messageHistory;
       for (let i = 0; i < this.senders.length; i++) {

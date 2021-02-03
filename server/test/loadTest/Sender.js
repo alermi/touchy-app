@@ -73,10 +73,11 @@ class Sender {
     let conciseSenderHistory = this.removeRedundantEntries(
       filteredReceiverHistory
     );
-    console.log(conciseReceiverHistory);
-    console.log(conciseSenderHistory);
+    // console.log(conciseReceiverHistory);
+    // console.log(conciseSenderHistory);
 
     assert.deepStrictEqual(conciseReceiverHistory, conciseSenderHistory);
+    console.log("Sender " + this.uid + " validated.");
     // return this.compareConciseArrays(
     //   conciseSenderHistory,
     //   conciseReceiverHistory
