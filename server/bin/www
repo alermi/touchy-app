@@ -36,13 +36,7 @@ const auth = new Authenticator();
  */
 const emailAsUid = nodeEnv === "production" ? false : true;
 var ConnectionHandler = require("../src/connectionHandler");
-const connectionHandler = new ConnectionHandler(
-  server,
-  auth,
-  5,
-  100,
-  emailAsUid
-);
+const connectionHandler = new ConnectionHandler(server, auth, emailAsUid);
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -11,7 +11,7 @@ class ConnectionData {
 }
 //TODO: Try passing in true to disconnect calls. This will close the underlying connection too.
 class ConnectionHandler {
-  constructor(server, auth, maxReceiversCount, maxSendersCount, emailAsUid) {
+  constructor(server, auth, emailAsUid) {
     this.receivers = [];
     this.io = require("socket.io")(server, {
       cors: {
@@ -96,8 +96,6 @@ class ConnectionHandler {
     this.interval = false;
     this.currReceiversCount = 0;
     this.currSendersCount = 0;
-    this.maxReceiversCount = maxReceiversCount;
-    this.maxSendersCount = maxSendersCount;
   }
 
   handleNewConnection(socket) {
@@ -264,20 +262,20 @@ class ConnectionHandler {
     }
   }
   handleJoinSendersRequest(socket) {
-    if (this.currSendersCount >= this.maxSendersCount) {
-      if (this.currSendersCount > this.maxSendersCount) {
-        console.log(
-          "ERROR: Current senders count is greater than maximum allowed."
-        );
-      }
-      console.log(
-        "Socket " +
-          socket.id +
-          " tried to join senders but was rejected because receivers are full."
-      );
-      socket.disconnect();
-      return;
-    }
+    // if (this.currSendersCount >= this.maxSendersCount) {
+    //   if (this.currSendersCount > this.maxSendersCount) {
+    //     console.log(
+    //       "ERROR: Current senders count is greater than maximum allowed."
+    //     );
+    //   }
+    //   console.log(
+    //     "Socket " +
+    //       socket.id +
+    //       " tried to join senders but was rejected because receivers are full."
+    //   );
+    //   socket.disconnect();
+    //   return;
+    // }
 
     this.currSendersCount++;
     this.sendersMap.set(
@@ -298,20 +296,20 @@ class ConnectionHandler {
   }
 
   handleJoinReceiversRequest(socket) {
-    if (this.currReceiversCount >= this.maxReceiversCount) {
-      if (this.currReceiversCount > this.maxReceiversCount) {
-        console.log(
-          "ERROR: Current receivers count is greater than maximum allowed."
-        );
-      }
-      console.log(
-        "Socket " +
-          socket.id +
-          " tried to join receivers but was rejected because receivers are full."
-      );
-      socket.disconnect();
-      return;
-    }
+    // if (this.currReceiversCount >= this.maxReceiversCount) {
+    //   if (this.currReceiversCount > this.maxReceiversCount) {
+    //     console.log(
+    //       "ERROR: Current receivers count is greater than maximum allowed."
+    //     );
+    //   }
+    //   console.log(
+    //     "Socket " +
+    //       socket.id +
+    //       " tried to join receivers but was rejected because receivers are full."
+    //   );
+    //   socket.disconnect();
+    //   return;
+    // }
     this.currReceiversCount++;
     this.receivers.push(socket.id);
     console.log(
