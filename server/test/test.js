@@ -30,7 +30,7 @@ before(() => {
     var MockAuthenticator = require("./mockAuth");
     const mockAuth = new MockAuthenticator();
     var ConnectionHandler = require("../src/connectionHandler");
-    connectionHandler = new ConnectionHandler(server, mockAuth, false);
+    connectionHandler = new ConnectionHandler(server, mockAuth, true);
     socketIdToUidMap = new Map();
 
     server.listen(port);
