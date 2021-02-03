@@ -30,7 +30,6 @@ class ConnectionHandler {
     });
 
     this.io.use((socket, next) => {
-      console.log("Incoming connection");
       const token = socket.handshake.auth.token;
       if (token == null) {
         next(new Error("Token not provided."));

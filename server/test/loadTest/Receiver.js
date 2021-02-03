@@ -19,9 +19,9 @@ class Receiver {
       this.isConnected = true;
       console.log("Receiver " + this.uid + " connected.");
     });
-    this.socket.on("disconnect", () => {
+    this.socket.on("disconnect", (reason) => {
       this.isConnected = false;
-      console.log("Receiver " + this.uid + " disconnected.");
+      console.log("Receiver " + this.uid + " disconnected. Reason: " + reason);
     });
     this.socket.on("message", (data) => {
       this.handleMessageReceived(data);
