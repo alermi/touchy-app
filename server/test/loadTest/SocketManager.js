@@ -68,10 +68,10 @@ class SocketManager {
 
   shutDownAll() {
     console.log("Shutting down all sockets");
-    for (let i = 0; i < this.numReceivers; i++) {
+    for (let i = 0; i < this.receivers.length; i++) {
       this.receivers[i].shutDown();
     }
-    for (let i = 0; i < this.numSenders; i++) {
+    for (let i = 0; i < this.senders.length; i++) {
       this.senders[i].shutDown();
     }
   }

@@ -23,7 +23,7 @@ before(() => {
     // Server setup
     var app = require("../../app");
     var http = require("http");
-    var port = 8080;
+    var port = 8090;
     app.set("port", port);
     server = http.createServer(app);
     var Authenticator = require("../../src/auth");
@@ -49,7 +49,7 @@ after(() => {
 });
 
 describe("Load Test", function () {
-  const numSenders = SENDER_NUM_LIMIT;
+  const numSenders = 10;
   const numReceivers = 2;
   this.timeout(1000 * 60 * 60); // 1h
   before(async () => {
@@ -63,7 +63,7 @@ describe("Load Test", function () {
   });
 
   it("Normal send interval", (done) => {
-    const numVals = 10;
+    const numVals = 2;
     const msPerNum = 5000;
     //Timeout for all sockets to be connected
     setTimeout(() => {
