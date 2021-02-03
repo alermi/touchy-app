@@ -34,7 +34,7 @@ const auth = new Authenticator();
 /**
  * Set up connection handler with the server which controls sockets
  */
-const emailAsUid = nodeEnv === "production" ? false : true;
+const emailAsUid = process.env.EMAIL_UID == "true" ? true : false;
 var ConnectionHandler = require("../src/connectionHandler");
 const connectionHandler = new ConnectionHandler(server, auth, emailAsUid);
 

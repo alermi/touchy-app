@@ -1,4 +1,5 @@
-// If setting this to false, make sure the backend server is already started and running in development mode.
+// If setting this to false, make sure the backend server is already started and running in FIREBASE_ENV=development
+// and EMAIL_UID=true mode.
 const LOCAL_TEST = true;
 // const LOCAL_TEST = false;
 
