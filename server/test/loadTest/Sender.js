@@ -6,7 +6,7 @@ class Sender {
     this.token = token;
     this.uid = uid;
     this.isConnected = false;
-
+    this.lastTime = -1;
     this.socket = io(serverURL, {
       query: {
         socketType: "sender",
@@ -18,10 +18,23 @@ class Sender {
     this.socket.on("connect", () => {
       this.isConnected = true;
       console.log("Sender " + this.uid + " connected.");
+      if (!this.timeout && this.sendQueue.length > 0) {
+        if (this.interval != null) {
+          // Continue where you left off at disconnect (Restart sending the last data from scratch);
+          this.timeout = setTimeout(() => {
+            this.moveToNextSend();
+          }, this.lastTime);
+        } else {
+          // Start sending normally
+          this.moveToNextSend();
+        }
+      }
     });
-    this.socket.on("disconnect", () => {
+    this.socket.on("disconnect", (reason) => {
       this.isConnected = false;
-      console.log("Sender " + this.uid + " disconnected.");
+      clearTimeout(this.timeout);
+      this.timeout = null;
+      console.log("Sender " + this.uid + " disconnected. Reason: " + reason);
     });
 
     this.sendQueue = [];
@@ -50,6 +63,7 @@ class Sender {
     this.interval = null;
     if (this.sendQueue.length > 0) {
       let { data, time, speed } = this.sendQueue.shift();
+      this.lastTime = time;
       this.sendHistory.push(data);
       this.interval = setInterval(() => {
         this.socket.send(data);
