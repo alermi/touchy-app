@@ -11,7 +11,7 @@ class ConnectionData {
 }
 //TODO: Try passing in true to disconnect calls. This will close the underlying connection too.
 class ConnectionHandler {
-  constructor(server, auth, maxReceiversCount, maxSendersCount) {
+  constructor(server, auth, maxReceiversCount, maxSendersCount, emailAsUid) {
     this.receivers = [];
     this.io = require("socket.io")(server, {
       cors: {
@@ -30,6 +30,7 @@ class ConnectionHandler {
     });
 
     this.io.use((socket, next) => {
+      console.log("Incoming connection");
       const token = socket.handshake.auth.token;
       if (token == null) {
         next(new Error("Token not provided."));
@@ -42,12 +43,13 @@ class ConnectionHandler {
           if (decodedToken.admin === true) {
             socket.admin = true;
           }
+          const uid = emailAsUid ? decodedToken.email : decodedToken.uid;
           switch (socketType) {
             case "receiver":
               const authorizedToReceive =
                 decodedToken.artist || decodedToken.admin;
               if (authorizedToReceive) {
-                socket.uid = decodedToken.uid;
+                socket.uid = uid;
                 next();
                 return;
               } else {
@@ -60,7 +62,6 @@ class ConnectionHandler {
                 return;
               }
             case "sender":
-              const uid = decodedToken.uid;
               let returnedSocket = this.idToSocketMap.get(uid);
               if (returnedSocket !== undefined) {
                 console.log(
