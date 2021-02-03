@@ -15,7 +15,6 @@ let tokenGenerator;
 let serverURL;
 let server;
 let connectionHandler;
-let socketIdToUidMap;
 //TODO: Remove the authorization from senders and test the rejection of sockets.
 before(() => {
   if (LOCAL_TEST) {
@@ -27,10 +26,8 @@ before(() => {
     server = http.createServer(app);
     var Authenticator = require("../../src/auth");
     const auth = new Authenticator();
-    let isDevelopment = app.get("env");
     var ConnectionHandler = require("../../src/connectionHandler");
-    connectionHandler = new ConnectionHandler(server, auth, 5, 100, true);
-    socketIdToUidMap = new Map();
+    connectionHandler = new ConnectionHandler(server, auth, false);
 
     server.listen(port);
     app.set("server", server);
@@ -38,7 +35,7 @@ before(() => {
   } else {
     serverURL = "https://touchy-backend.azurewebsites.net";
   }
-
+  console.log("Server URL: " + serverURL);
   tokenGenerator = new LoadTestAccountGenerator(9);
   socketManager = new SocketManager(serverURL, tokenGenerator);
 });
@@ -50,9 +47,9 @@ after(() => {
 });
 
 describe("Load Test", function () {
-  this.timeout(100000);
-  const numSenders = 2;
-  const numReceivers = 2;
+  const numSenders = 9;
+  const numReceivers = 5;
+  this.timeout(1000 * 60 * 60); // 1h
   before(async () => {
     await socketManager.addSenders(numSenders);
     await socketManager.addReceivers(numReceivers);
@@ -61,11 +58,14 @@ describe("Load Test", function () {
     socketManager.shutDownAll();
   });
 
-  it("Send and receive single random datapoint", (done) => {
-    socketManager.send(2, 2000, NORMAL_SEND_INTERVAL);
+  it("Normal send interval", (done) => {
+    const numVals = 50;
+    const msPerNum = 2000;
+    this.timeout(msPerNum * numVals + 10000);
+    socketManager.send(numVals, msPerNum, NORMAL_SEND_INTERVAL);
     setTimeout(() => {
       socketManager.validate();
       done();
-    }, 5000);
+    }, numVals * msPerNum + 2000);
   });
 });
