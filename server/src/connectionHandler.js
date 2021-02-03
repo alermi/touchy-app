@@ -453,7 +453,7 @@ class ConnectionHandler {
       return true;
     } else if (shouldExist) {
       console.log(
-        "WARNING: Tried to clean receiver data that was expected to exist but did not."
+        "WARNING: Tried to clean sender data that was expected to exist but did not."
       );
     }
     return false;
