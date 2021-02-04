@@ -43,6 +43,16 @@ class Sender {
     this.timeout = null;
   }
 
+  setToken(token) {
+    if (this.socket.io.opts.auth.token !== token) {
+      this.socket.io.opts.auth = {
+        token: token,
+      };
+      console.log("Updated token for " + this.uid);
+    } else {
+      console.log("Token did not change for " + this.uid);
+    }
+  }
   addToSendQueue(data, time, speed) {
     this.sendQueue.push({ data: data, time: time, speed: speed });
     if (this.isConnected && !this.timeout) {
@@ -89,8 +99,40 @@ class Sender {
     );
     // console.log(conciseReceiverHistory);
     // console.log(conciseSenderHistory);
-
-    assert.deepStrictEqual(conciseReceiverHistory, conciseSenderHistory);
+    if (conciseReceiverHistory.length == 0) {
+      console.log(
+        "ERROR: ConciseReceiverHistory was empty at validateReceiverHistory."
+      );
+      return { total: conciseSenderHistory.length, correct: 0 };
+    }
+    if (conciseSenderHistory.length == 0) {
+      console.log(
+        "ERROR: ConciseSenderHistory was empty at validateReceiverHistory."
+      );
+      return { total: 0, correct: 0 };
+    }
+    try {
+      assert.deepStrictEqual(conciseReceiverHistory, conciseSenderHistory);
+      return {
+        total: conciseReceiverHistory.length,
+        correct: conciseReceiverHistory.length,
+      };
+    } catch (err) {
+      console.log(
+        "Error on validateReceiverHistory for sender " +
+          this.uid +
+          ": " +
+          err.message
+      );
+      const total =
+        conciseReceiverHistory.length > conciseSenderHistory.length
+          ? conciseReceiverHistory.length
+          : conciseSenderHistory.length;
+      return {
+        total: total,
+        correct: 0,
+      };
+    }
     console.log("Sender " + this.uid + " validated.");
     // return this.compareConciseArrays(
     //   conciseSenderHistory,
@@ -151,9 +193,9 @@ class Sender {
   shutDown() {
     this.socket.disconnect();
     if (this.interval != null) {
-      this.clearInterval(this.interval);
-      this.clearTimeout(this.timeout);
-      throw new Error("Sender was not done sending at shutDown");
+      clearInterval(this.interval);
+      clearTimeout(this.timeout);
+      console.error("ERROR: Sender was not done sending at shutDown");
     }
   }
 }

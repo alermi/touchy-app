@@ -54,5 +54,14 @@ class Receiver {
   printMessageHistory() {
     console.log(this.messageHistory);
   }
+
+  setToken(token) {
+    if (this.socket.io.opts.auth.token !== token) {
+      this.socket.io.opts.auth = {
+        token: token,
+      };
+      console.log("Updated token for " + this.uid);
+    }
+  }
 }
 module.exports = Receiver;

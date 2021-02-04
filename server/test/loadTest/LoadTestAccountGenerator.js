@@ -16,11 +16,19 @@ class LoadTestAccountGenerator {
     this.password = "123123";
     this.senderIndex = 0;
     this.receiverTokens = [];
+    this.userMap = new Map();
   }
 
   reset() {
     this.senderIndex = 0;
   }
+
+  getRefreshedToken(email, forceRefresh) {
+    const user = this.userMap.get(email);
+    return user.getIdToken(forceRefresh);
+  }
+
+  forceRefreshReceiverToken() {}
 
   async generateSender() {
     if (this.senderIndex >= this.numSenders) {
@@ -39,6 +47,7 @@ class LoadTestAccountGenerator {
           .auth()
           .signInWithEmailAndPassword(senderEmail, this.password);
         const token = await userCredential.user.getIdToken(false);
+        this.userMap.set(senderEmail, userCredential.user);
         this.senderTokens[this.senderIndex] = token;
         this.senderIndex++;
         return { token: token, uid: senderEmail };
@@ -56,6 +65,7 @@ class LoadTestAccountGenerator {
         .auth()
         .signInWithEmailAndPassword(this.receiverEmail, this.password);
       const token = await userCredential.user.getIdToken(false);
+      this.userMap.set(this.receiverEmail, userCredential.user);
       this.receiverToken = token;
       return { token: token, uid: this.receiverEmail };
     } else return { token: this.receiverToken, uid: this.receiverEmail };

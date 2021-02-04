@@ -1,7 +1,7 @@
 // If setting this to false, make sure the backend server is already started and running in FIREBASE_ENV=development
 // and EMAIL_UID=true mode.
-const LOCAL_TEST = true;
-// const LOCAL_TEST = false;
+// const LOCAL_TEST = true;
+const LOCAL_TEST = false;
 
 const NORMAL_SEND_INTERVAL = 1000 / 5;
 const FAST_SEND_INTERVAL = 1000 / 20;
@@ -45,26 +45,28 @@ before(() => {
 after(() => {
   if (LOCAL_TEST) {
     server.close();
+    tokenGenerator.stopUpdates();
   }
 });
 
 describe("Load Test", function () {
-  const numSenders = 10;
-  const numReceivers = 2;
-  this.timeout(1000 * 60 * 60); // 1h
-  before(async () => {
+  const numSenders = SENDER_NUM_LIMIT;
+  const numReceivers = 3;
+  const numVals = 360;
+  const msPerNum = 5000;
+  this.timeout(2000 * 60 * 60); // 2h
+  beforeEach(async () => {
     await socketManager.addReceivers(numReceivers);
     await socketManager.addSenders(numSenders);
     console.log("Before Ended");
     return Promise.resolve();
   });
-  after(() => {
+  afterEach(() => {
     socketManager.shutDownAll();
+    tokenGenerator.reset();
   });
 
   it("Normal send interval", (done) => {
-    const numVals = 2;
-    const msPerNum = 5000;
     //Timeout for all sockets to be connected
     setTimeout(() => {
       socketManager.send(numVals, msPerNum, NORMAL_SEND_INTERVAL);
@@ -72,7 +74,18 @@ describe("Load Test", function () {
       setTimeout(() => {
         socketManager.validate();
         done();
-      }, numVals * msPerNum + 10000);
+      }, numVals * msPerNum + 20000);
+    }, 30000);
+  });
+  it("Fast send interval", (done) => {
+    //Timeout for all sockets to be connected
+    setTimeout(() => {
+      socketManager.send(numVals, msPerNum, FAST_SEND_INTERVAL);
+      // Timeout for all sending and receiving to be done
+      setTimeout(() => {
+        socketManager.validate();
+        done();
+      }, numVals * msPerNum + 20000);
     }, 30000);
   });
 });
