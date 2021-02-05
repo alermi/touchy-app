@@ -1,7 +1,7 @@
 // If setting this to false, make sure the backend server is already started and running in FIREBASE_ENV=development
 // and EMAIL_UID=true mode.
-// const LOCAL_TEST = true;
-const LOCAL_TEST = false;
+const LOCAL_TEST = true;
+// const LOCAL_TEST = false;
 
 const NORMAL_SEND_INTERVAL = 1000 / 5;
 const FAST_SEND_INTERVAL = 1000 / 20;
@@ -45,14 +45,15 @@ before(() => {
 after(() => {
   if (LOCAL_TEST) {
     server.close();
-    tokenGenerator.stopUpdates();
+    socketManager.stopUpdates();
   }
 });
 
 describe("Load Test", function () {
   const numSenders = SENDER_NUM_LIMIT;
   const numReceivers = 3;
-  const numVals = 360;
+  // const numVals = 360;
+  const numVals = 10;
   const msPerNum = 5000;
   this.timeout(2000 * 60 * 60); // 2h
   beforeEach(async () => {
