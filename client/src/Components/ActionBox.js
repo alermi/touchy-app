@@ -9,6 +9,10 @@ const ActionBox = (props) => {
 
   const [isActive, setIsActive] = useState(false);
   const [isPositionOutside, setIsPositionOutside] = useState(true);
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [shouldSend, setShouldSend] = useState(false);
+  const [isTouchScreen, setIsTouchScreen] = useState();
+
   const [elementDimensions, setElementDimensions] = useState({
     width: -1,
     height: -1,
@@ -19,7 +23,7 @@ const ActionBox = (props) => {
   });
 
   const sendData = () => {
-    if (!isPositionOutside && isActive && socket && connected) {
+    if (shouldSend && socket && connected) {
       let data = [activeProportions.x, activeProportions.y];
       socket.send(data);
     }
@@ -37,6 +41,24 @@ const ActionBox = (props) => {
     }, 1000 / 5);
     return () => clearInterval(interval);
   }, []);
+
+  // This resets the mousedown for when the user presses down
+  // the mouse within the actionbox and then drags the mouse outside.
+  // since we can't detect mouseUp event outside the app, we just reset
+  // the boolean when the mouse leaves the box.
+  useEffect(() => {
+    if (isPositionOutside) {
+      setIsMouseDown(false);
+    }
+  }, [isPositionOutside]);
+
+  useEffect(() => {
+    if (isTouchScreen) {
+      setShouldSend(isActive && !isPositionOutside);
+    } else {
+      setShouldSend(isActive && !isPositionOutside && isMouseDown);
+    }
+  }, [isActive, isPositionOutside, isTouchScreen, isMouseDown]);
 
   const onPositionChanged = (e) => {
     if (e.elementDimensions != null) {
@@ -65,18 +87,32 @@ const ActionBox = (props) => {
     sendDataRef.current();
   };
 
+  const onDetectedEnvironmentChanged = (e) => {
+    if (e.isMouseDetected) {
+      setIsTouchScreen(false);
+    } else {
+      setIsTouchScreen(true);
+    }
+  };
+
+  const onMouseDown = () => {
+    setIsMouseDown(true);
+  };
+  const onMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
   return (
     <>
       <div
         className="Action-box"
         style={{
-          backgroundColor: isActive && !isPositionOutside ? "white" : "black",
-          border:
-            isActive && !isPositionOutside
-              ? " 2px solid black"
-              : " 2px solid white",
+          backgroundColor: shouldSend ? "white" : "black",
+          border: shouldSend ? " 2px solid black" : " 2px solid white",
           transition: "all 0.5s",
         }}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
       >
         <ReactCursorPosition
           style={{
@@ -87,6 +123,7 @@ const ActionBox = (props) => {
           activationInteractionTouch="touch"
           onPositionChanged={onPositionChanged}
           onActivationChanged={onActivationChanged}
+          onDetectedEnvironmentChanged={onDetectedEnvironmentChanged}
         >
           <Cursor className="cursor" />
           {/* <div style={{
