@@ -1,11 +1,12 @@
 const RECEIVER_CHANNEL_NAME = "receivers-room";
 
 class ConnectionData {
-  constructor(connectionTime, lastX, lastY, isActive, uid) {
+  constructor(connectionTime, lastX, lastY, isActive, wasActive, uid) {
     this.connectionTime = connectionTime;
     this.lastX = lastX;
     this.lastY = lastY;
     this.isActive = isActive;
+    this.wasActive = wasActive;
     this.uid = uid;
   }
 }
@@ -180,6 +181,7 @@ class ConnectionHandler {
       data[0],
       data[1],
       true,
+      oldConnectionData.wasActive,
       socket.uid
     );
     this.sendersMap.set(socket.id, newConnectionData);
@@ -279,7 +281,7 @@ class ConnectionHandler {
     this.currSendersCount++;
     this.sendersMap.set(
       socket.id,
-      new ConnectionData(Date.now(), 0, 0, false, socket.uid)
+      new ConnectionData(Date.now(), 0, 0, false, false, socket.uid)
     );
     if (this.checkIfShouldSend() && this.interval == false) {
       this.startSending();
@@ -391,9 +393,10 @@ class ConnectionHandler {
       data.push(val.uid);
       data.push(val.lastX);
       data.push(val.lastY);
-      data.push(val.isActive);
+      data.push(val.isActive || val.wasActive);
       data.push(val.connectionTime);
 
+      val.wasActive = val.isActive;
       val.isActive = false;
       this.sendersMap.set(key, val);
     }
