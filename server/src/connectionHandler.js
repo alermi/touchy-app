@@ -140,8 +140,6 @@ class ConnectionHandler {
         return;
     }
 
-    console.log("Client " + socket.id + " connected");
-
     socket.on("message", (data) => {
       this.handleNewMessage(socket, data);
     });
