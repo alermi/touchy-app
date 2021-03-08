@@ -23,7 +23,6 @@ export default function PrivacyPolicy() {
             textAlign: "start",
             backgroundColor: "white",
             color: "black",
-            wordBreak: "break-all",
             width: "80%",
           }}
         >
@@ -278,6 +277,9 @@ export default function PrivacyPolicy() {
                 href="https://helpx.adobe.com/flash-player/kb/disable-local-shared-objects-flash.html#main_Where_can_I_change_the_settings_for_disabling__or_deleting_local_shared_objects_"
                 //   target="_blank"
                 rel="noopener"
+                style={{
+                  wordBreak: "break-all",
+                }}
               >
                 <span>
                   https://helpx.adobe.com/flash-player/kb/disable-local-shared-objects-flash.html#main_Where_can_I_change_the_settings_for_disabling__or_deleting_local_shared_objects_
