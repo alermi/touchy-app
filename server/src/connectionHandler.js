@@ -94,13 +94,9 @@ class ConnectionHandler {
     });
 
     this.interval = false;
-    this.currReceiversCount = 0;
-    this.currSendersCount = 0;
   }
 
   handleNewConnection(socket) {
-    //TODO: Check max connection count
-    //TODO: Maybe move these checks into the join request methods. Maybe not. Since we will be adding to the wait list, might get messy
     if (this.sendersMap.has(socket.id)) {
       console.log(
         "WARNING: Sender " +
@@ -149,14 +145,11 @@ class ConnectionHandler {
     });
 
     socket.on("disconnect", (reason) => {
-      //TODO: Remove this log
-      console.log("On Disconnect called for socket " + socket.id);
       this.handleDisconnect(socket, reason);
     });
   }
 
   handleNewMessage(socket, data) {
-    //TODO: Format check
     if (this.receivers.includes(socket.id)) {
       console.log("WARNING: A receiver sent a message. Ignored.");
       return;
@@ -261,22 +254,6 @@ class ConnectionHandler {
     }
   }
   handleJoinSendersRequest(socket) {
-    // if (this.currSendersCount >= this.maxSendersCount) {
-    //   if (this.currSendersCount > this.maxSendersCount) {
-    //     console.log(
-    //       "ERROR: Current senders count is greater than maximum allowed."
-    //     );
-    //   }
-    //   console.log(
-    //     "Socket " +
-    //       socket.id +
-    //       " tried to join senders but was rejected because receivers are full."
-    //   );
-    //   socket.disconnect();
-    //   return;
-    // }
-
-    this.currSendersCount++;
     this.sendersMap.set(
       socket.id,
       new ConnectionData(Date.now(), 0, 0, false, false, socket.uid)
@@ -295,21 +272,6 @@ class ConnectionHandler {
   }
 
   handleJoinReceiversRequest(socket) {
-    // if (this.currReceiversCount >= this.maxReceiversCount) {
-    //   if (this.currReceiversCount > this.maxReceiversCount) {
-    //     console.log(
-    //       "ERROR: Current receivers count is greater than maximum allowed."
-    //     );
-    //   }
-    //   console.log(
-    //     "Socket " +
-    //       socket.id +
-    //       " tried to join receivers but was rejected because receivers are full."
-    //   );
-    //   socket.disconnect();
-    //   return;
-    // }
-    this.currReceiversCount++;
     this.receivers.push(socket.id);
     console.log(
       "Client " +
@@ -322,18 +284,12 @@ class ConnectionHandler {
 
     socket.join(RECEIVER_CHANNEL_NAME);
 
-    //TODO: Fix the rest of this method
     if (this.checkIfShouldSend() && this.interval == false) {
       this.startSending();
     }
-    // //TODO: Consider getting rid of else if.
-    // else if(!this.checkIfShouldSend() && this.interval != false){
-    //     this.stopSending();
-    // }
   }
 
   verifyReceivedDataFormat(data) {
-    //TODO: Send corrupt data and see if this catches all cases without crashing.
     if (
       !Array.isArray(data) ||
       data.length != 2 ||
@@ -344,14 +300,13 @@ class ConnectionHandler {
       return false;
     }
     if (data[0] > 1 || data[0] < 0 || data[1] > 1 || data[1] < 0) {
-      //TODO: Delete the data print from log
-      console.log(
-        "WARNING: Data received is out of range of 0 to 1 (" +
-          data[0] +
-          ", " +
-          data[1] +
-          ")"
-      );
+      // console.log(
+      //   "WARNING: Data received is out of range of 0 to 1 (" +
+      //     data[0] +
+      //     ", " +
+      //     data[1] +
+      //     ")"
+      // );
       return false;
     }
     return true;
@@ -437,7 +392,6 @@ class ConnectionHandler {
     if (this.receivers.includes(socket.id)) {
       let index = this.receivers.indexOf(socket.id);
       this.receivers.splice(index, 1);
-      this.currReceiversCount--;
       return true;
     } else if (shouldExist) {
       console.log(
@@ -450,7 +404,6 @@ class ConnectionHandler {
   cleanSenderSocketData(socket, shouldExist) {
     if (this.sendersMap.has(socket.id)) {
       this.sendersMap.delete(socket.id);
-      this.currSendersCount--;
       return true;
     } else if (shouldExist) {
       console.log(
