@@ -27,7 +27,13 @@ const RemoveDataView = () => {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        height: "100%",
+        backgroundColor: "white",
+        color: "black",
+      }}
+    >
       <p>
         Press the 'Delete Data' button in order to delete your user data. You
         must have signed in recently in order for this to work.
