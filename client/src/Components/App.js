@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import Login from "./Login";
 import Home from "./Home";
 import RemoveDataView from "./RemoveDataView";
@@ -9,7 +9,7 @@ import AuthContextProvider from "../Contexts/AuthContext";
 import ProtectedRoute from "../Routes/ProtectedRoute";
 import LoginRoute from "../Routes/LoginRoute";
 import AdminRoute from "../Routes/AdminRoute";
-
+import PrivacyPolicy from "./PrivacyPolicy";
 import SocketContextProvider from "../Contexts/SocketContext";
 const dotenv = require("dotenv");
 dotenv.config();
@@ -28,6 +28,7 @@ const App = () => {
               path="/removeData"
               component={RemoveDataView}
             />
+            <Route exact path="/privacyPolicy" component={PrivacyPolicy} />
           </Switch>
         </SocketContextProvider>
       </AuthContextProvider>

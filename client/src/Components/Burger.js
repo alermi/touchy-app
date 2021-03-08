@@ -7,7 +7,8 @@ import "./Burger.css";
 const Burger = () => {
   const history = useHistory();
   const [isOpen, setIsOpen] = useState();
-  const { auth, isAdmin } = useContext(AuthContext);
+  const { auth, isAdmin, currentUser } = useContext(AuthContext);
+  const isLoggedIn = currentUser ? true : false;
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -32,32 +33,46 @@ const Burger = () => {
         >
           HOME
         </p>
+        {isLoggedIn && (
+          <p
+            className="menu-item"
+            onClick={() => {
+              auth.signOut();
+            }}
+          >
+            SIGN OUT
+          </p>
+        )}
+
         <p
           className="menu-item"
           onClick={() => {
-            auth.signOut();
+            history.push("./privacyPolicy");
+            closeMenu();
           }}
         >
-          SIGN OUT
+          PRIVACY POLICY
         </p>
-        <p
-          className="menu-item"
-          style={{
-            marginTop: "auto",
-            color: "gray",
-          }}
-          onClick={() => {
-            if (isAdmin) {
-              history.push("/admin");
-              closeMenu();
-            } else {
-              history.push("./removeData");
-              closeMenu();
-            }
-          }}
-        >
-          {isAdmin ? "Admin Panel" : "Delete Account"}
-        </p>
+        {isLoggedIn && (
+          <p
+            className="menu-item"
+            style={{
+              marginTop: "auto",
+              color: "gray",
+            }}
+            onClick={() => {
+              if (isAdmin) {
+                history.push("/admin");
+                closeMenu();
+              } else {
+                history.push("./removeData");
+                closeMenu();
+              }
+            }}
+          >
+            {isAdmin ? "Admin Panel" : "Delete Account"}
+          </p>
+        )}
       </Menu>
     </div>
   );
