@@ -35,7 +35,7 @@ export default function RemoveDataInstructions() {
             </li>
             <li>
               Click on the Delete Account item at the bottom of the hamburger
-              menu
+              menu.
             </li>
             <li>Click on the "Delete Data" button.</li>
           </ul>
