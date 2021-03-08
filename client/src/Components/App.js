@@ -4,6 +4,7 @@ import { Route, Switch } from "react-router-dom";
 import Login from "./Login";
 import Home from "./Home";
 import RemoveDataView from "./RemoveDataView";
+import RemoveDataInstructions from "./RemoveDataInstructions";
 import AdminView from "./AdminView";
 import AuthContextProvider from "../Contexts/AuthContext";
 import ProtectedRoute from "../Routes/ProtectedRoute";
@@ -29,6 +30,11 @@ const App = () => {
               component={RemoveDataView}
             />
             <Route exact path="/privacyPolicy" component={PrivacyPolicy} />
+            <Route
+              exact
+              path="/removeDataInstructions"
+              component={RemoveDataInstructions}
+            />
           </Switch>
         </SocketContextProvider>
       </AuthContextProvider>
