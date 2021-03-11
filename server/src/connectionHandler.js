@@ -16,11 +16,13 @@ class ConnectionHandler {
     this.receivers = [];
     this.io = require("socket.io")(server, {
       cors: {
-        origin: process.env.CLIENT_URL,
+        origin: [process.env.CLIENT_URL, process.env.CLIENT_URL_NEW],
         methods: ["GET", "POST"],
       },
     });
-    console.log("CORS at " + process.env.CLIENT_URL);
+    console.log(
+      "CORS at " + process.env.CLIENT_URL + ", " + process.env.CLIENT_URL_NEW
+    );
 
     this.sendersMap = new Map();
     this.idToSocketMap = new Map();
