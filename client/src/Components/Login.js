@@ -44,7 +44,13 @@ const Login = (props) => {
   };
   return (
     <div className="Login">
-      <img src={touchyLogo} alt="logo" className="Login-Logo" />
+      <div
+        style={{
+          minHeight: "35%",
+        }}
+      >
+        <img src={touchyLogo} alt="logo" className="Login-Logo" />
+      </div>
       <div className="Login-Options">
         <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
       </div>
