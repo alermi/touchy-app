@@ -2,8 +2,8 @@ import React, { useContext } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import { AuthContext } from "../Contexts/AuthContext";
 import "./Login.css";
-import logo2 from "../Resources/krea-logo-2.png";
-
+import touchyLogo from "../Resources/touchy-logo.jpg";
+import kreaLogo from "../Resources/krea-logo.png";
 const Login = (props) => {
   const { auth } = useContext(AuthContext);
 
@@ -44,21 +44,13 @@ const Login = (props) => {
   };
   return (
     <div className="Login">
-      <a
-        href="https://krea.today"
-        style={{
-          display: "flex",
-          marginLeft: "35vw",
-          marginRight: "35vw",
-          marginTop: "auto",
-          marginBottom: "auto",
-        }}
-      >
-        <img src={logo2} alt="logo" className="Login-Logo" />
+      <img src={touchyLogo} alt="logo" className="Login-Logo" />
+      <div className="Login-Options">
+        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
+      </div>
+      <a href="https://krea.today">
+        <img src={kreaLogo} alt="logo" className="Login-Krea-Logo" />
       </a>
-      <p className="Login-Title"> AUDIENCE INTERACTION TOOL</p>
-      <p>Sign in to continue:</p>
-      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth.getAuth()} />
     </div>
   );
 };

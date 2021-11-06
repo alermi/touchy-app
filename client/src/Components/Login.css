@@ -1,18 +1,35 @@
 .Login {
   background-color: #ffffff;
-  height: 100vh;
+  height: 100%;
   font-family: "Courier New";
   color: #000000;
   flex-direction: column;
+  display: flex;
 }
 
 .Login-Logo {
-  transform: rotate(270deg);
-  height: 100px;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
   margin-top: 5vh;
+  align-self: flex-start;
+}
+
+.Login-Options {
+  width: 300px;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5vh;
+  margin-bottom: auto;
+}
+.Login-Krea-Logo {
+  width: 150px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
   margin-bottom: 5vh;
+  align-self: flex-end;
 }
 
 .Login-Title {
