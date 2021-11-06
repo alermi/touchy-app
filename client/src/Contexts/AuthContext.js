@@ -125,6 +125,7 @@ class AuthContextProvider extends Component {
       isAdmin: false,
       token: null,
     });
+    authWrapper.signOut();
   }
   render() {
     const { children } = this.props;
