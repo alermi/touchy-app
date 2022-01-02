@@ -23,7 +23,9 @@ const Login = (props) => {
     },
     signInOptions: [
       auth.GoogleAuthProvider.PROVIDER_ID,
-      auth.FacebookAuthProvider.PROVIDER_ID,
+      process.env.REACT_APP_ENABLE_FACEBOOK_LOGIN === "true"
+        ? auth.FacebookAuthProvider.PROVIDER_ID
+        : null,
       {
         provider: auth.EmailAuthProvider.PROVIDER_ID,
         // Use email link authentication and do not require password.
